@@ -1,0 +1,24 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Bootstrap */
+@use 'bootstrap/scss/bootstrap';
+
+/* -----------------------------
+   Global Theme Variables
+------------------------------*/
+:root {
+  /* Brand */
+  --primary: #2b6129;
+  --secondary: #76b520;
+  --accent: #f7a413;
+  --earth: #745032;
+
+  /* UI */
+  --bg-light: #f8f9fa;
+  --text-dark: #212529;
+}
+
+body {
+  background: var(--bg-light);
+  color: var(--text-dark);
+}

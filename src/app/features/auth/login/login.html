@@ -1,0 +1,46 @@
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <!-- LEFT BRAND PANEL -->
+    <div class="login-visual">
+      <div class="brand">
+        <div class="brand-logo">🎓</div>
+        <h2>School Admin</h2>
+        <p>Manage students, staff & academics</p>
+      </div>
+    </div>
+
+    <!-- RIGHT FORM PANEL -->
+    <div class="login-form">
+      <h3>Welcome Back</h3>
+      <p class="subtitle">Sign in to continue</p>
+
+      <input
+        type="email"
+        class="login-input"
+        placeholder="Email address"
+        [(ngModel)]="email"
+      />
+
+      <input
+        type="password"
+        class="login-input"
+        placeholder="Password"
+        [(ngModel)]="password"
+      />
+
+      <button
+        class="login-btn"
+        (click)="submit()"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Signing in…' : 'Login' }}
+      </button>
+
+      <div class="login-footer">
+        © 2026 School Management System
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,31 @@
+<header class="admin-navbar">
+  <!-- Left section -->
+  <div class="navbar-left">
+    <!-- Menu toggle -->
+    <button
+      class="menu-btn"
+      (click)=" onToggleClick()"
+      title="Toggle menu"
+    >
+      ☰
+    </button>
+
+    <h1 class="page-title">Dashboard</h1>
+  </div>
+
+  <!-- Right section -->
+  <div class="navbar-right">
+    <span class="role-badge">
+      {{ auth.role() }}
+    </span>
+
+    <button
+      class="logout-btn"
+      (click)="logout()"
+      title="Logout"
+    >
+      ⎋ Logout
+    </button>
+  </div>
+</header>
+

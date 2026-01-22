@@ -1,0 +1,71 @@
+ <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3>Users</h3>
+
+      <button
+  class="btn btn-success btn-sm"
+  *ngIf="canCreate"
+  routerLink="/admin/users/create"
+>
+  + Add User
+</button>
+
+    </div>
+
+    <input
+      class="form-control mb-2"
+      placeholder="Search users..."
+      [(ngModel)]="search"
+      (keyup)="loadUsers()"
+    />
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th width="120">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let user of users; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role_name }}</td>
+          <td>
+            <span class="badge bg-success" *ngIf="user.status === 'active'">
+              Active
+            </span>
+            <span class="badge bg-secondary" *ngIf="user.status !== 'active'">
+              Inactive
+            </span>
+          </td>
+          <td>
+            <button
+  class="btn btn-sm btn-primary me-1"
+  *ngIf="canUpdate"
+  [routerLink]="['/admin/users/edit', user.id]"
+>
+  Edit
+</button>
+
+<button
+  class="btn btn-sm btn-danger"
+  *ngIf="canDelete"
+  (click)="remove(user.id)"
+>
+  Delete
+</button>
+
+          </td>
+        </tr>
+
+        <tr *ngIf="users.length === 0">
+          <td colspan="6" class="text-center">No users found</td>
+        </tr>
+      </tbody>
+    </table>

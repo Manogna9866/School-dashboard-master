@@ -1,0 +1,67 @@
+<nav class="sidebar">
+
+  <!-- ================= Brand ================= -->
+  <div class="sidebar-header">
+    <span class="logo">School Admin</span>
+  </div>
+
+  <!-- ================= Navigation ================= -->
+  <ul class="menu">
+
+    <!-- Dashboard -->
+    <li class="menu-item">
+      <a
+        class="nav-link"
+        routerLink="/admin/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="icon">🏠</span>
+        <span class="title">Dashboard</span>
+      </a>
+    </li>
+    <li class="menu-item">
+      <a
+        class="nav-link"
+        routerLink="/admin/classes"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="icon">🏠</span>
+        <span class="title">Classess</span>
+      </a>
+    </li>
+
+    <!-- Section: Modules -->
+    <li class="menu-section">Modules</li>
+
+    <!-- Dynamic Modules -->
+    <ng-container *ngFor="let module of modules()">
+
+      <li
+        class="menu-item"
+        *ngIf="permission.canView(module.module_key)"
+      >
+        <a
+          class="nav-link"
+          [routerLink]="['/admin', module.module_key]"
+          routerLinkActive="active"
+        >
+          <span
+            class="icon"
+            [style.color]="module.settings?.color"
+          >
+            {{ module.settings?.icon }}
+          </span>
+
+          <span class="title">
+            {{ module.module_name }}
+          </span>
+        </a>
+      </li>
+
+    </ng-container>
+
+  </ul>
+
+</nav>

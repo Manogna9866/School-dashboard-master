@@ -1,0 +1,13 @@
+.unauthorized {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
