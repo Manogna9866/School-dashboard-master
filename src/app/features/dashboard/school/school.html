@@ -1,0 +1,150 @@
+<div class="card">
+
+  <!-- Header -->
+  <div class="header">
+    <h2>Schools</h2>
+
+    <div class="header-actions">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search schools..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()"
+      />
+      <button class="btn primary" (click)="openAdd()">+ Add School</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Logo</th>
+          <th>School</th>
+          <th>Code</th>
+          <th>Type</th>
+          <th>Management</th>
+          <th>Chairman</th>
+          <th>Students</th>
+          <th>Teachers</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let school of paginatedSchools">
+          <td>{{ school.id }}</td>
+          <td>
+            <img
+              *ngIf="school.logo"
+              [src]="apiBaseUrl + '/' + school.logo"
+              class="school-logo"
+              alt="logo"
+            />
+          </td>
+          <td>{{ school.school_name }}</td>
+          <td>{{ school.school_code }}</td>
+          <td>{{ school.type }}</td>
+          <td>{{ school.management }}</td>
+          <td>{{ school.chairman_name }}</td>
+          <td>{{ school.total_students }}</td>
+          <td>{{ school.total_teachers }}</td>
+          <td>
+            <span class="status" [class.active]="school.status === 'active'">
+              {{ school.status }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(school)">Edit</button>
+            <button class="btn danger" (click)="delete(school.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedSchools.length">
+          <td colspan="11" class="no-data">No schools found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button
+      class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">
+      Prev
+    </button>
+
+    <span>Page {{ currentPage }} of {{ totalPages() }}</span>
+
+    <button
+      class="btn outline"
+      [disabled]="currentPage === totalPages() || totalPages() === 0"
+      (click)="changePage(currentPage + 1)">
+      Next
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+    <h3>{{ editId ? 'Edit School' : 'Add School' }}</h3>
+
+    <form [formGroup]="schoolForm" class="school-form">
+
+      <label>School Name</label>
+      <input formControlName="school_name" />
+
+      <label>School Code</label>
+      <input formControlName="school_code" />
+
+      <label>Address</label>
+      <textarea formControlName="address"></textarea>
+
+      <label>Type</label>
+      <input formControlName="type" />
+
+      <label>Management</label>
+      <input formControlName="management" />
+
+      <label>Chairman Name</label>
+      <input formControlName="chairman_name" />
+
+      <label>Contact Number</label>
+      <input formControlName="contact_number" />
+
+      <label>Email</label>
+      <input type="email" formControlName="email" />
+
+      <label>Total Students</label>
+      <input type="number" formControlName="total_students" />
+
+      <label>Total Teachers</label>
+      <input type="number" formControlName="total_teachers" />
+
+      <label>Established Year</label>
+      <input type="number" formControlName="established_year" />
+
+      <label>Status</label>
+      <select formControlName="status">
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+
+      <label>Logo URL</label>
+      <input formControlName="logo" placeholder="Enter logo URL" />
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+  </div>
+</div>

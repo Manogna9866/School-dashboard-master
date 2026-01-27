@@ -35,15 +35,15 @@ export class AuthService {
   }
 
   init() {
-  const token = localStorage.getItem('access_token');
-  const user = localStorage.getItem('user');
-  const permissions = localStorage.getItem('permissions');
+    const token = localStorage.getItem('access_token');
+    const user = localStorage.getItem('user');
+    const permissions = localStorage.getItem('permissions');
 
-  if (token && user && permissions) {
-    this._user.set(JSON.parse(user));
-    this._permissions.set(JSON.parse(permissions));
+    if (token && user && permissions) {
+      this._user.set(JSON.parse(user));
+      this._permissions.set(JSON.parse(permissions));
+    }
   }
-}
 
 
   // 🔐 LOGIN API
@@ -51,43 +51,82 @@ export class AuthService {
     console.log('API URL:', this.api);
     return this.api.post<any>('users/login', payload);
   }
+  //roles//
+  createRole(payload: { role_name: string; description: string }) {
+    console.log('API URL:', this.api);
+    return this.api.post<any>('roles', payload);
+  }
+  updateRole(id: string, payload: { role_name: string; description: string }) {
+    console.log('API URL:', this.api);
+    return this.api.put<any>(`roles/${id}`, payload);
+  }
+  deleteRole(id: string) {
+    console.log('API URL:', this.api);
+    return this.api.delete<any>(`roles/${id}`);
+  }
+  getRoles() {
+    console.log('API URL:', this.api);
+    return this.api.get<any>('roles');
+  }
+  //schools//
+  getSchools() {
+    console.log('API URL:', this.api);
+    return this.api.get<any>('schools');
+  }
 
+  // CREATE a school
+  createSchool(payload: any) {
+    console.log('API URL:', this.api);
+    return this.api.post<any>('schools', payload);
+  }
+
+  // UPDATE a school
+  updateSchool(id: string, payload: any) {
+    console.log('API URL:', this.api);
+    return this.api.put<any>(`schools/${id}`, payload);
+  }
+
+  // DELETE a school
+  deleteSchool(id: string) {
+    console.log('API URL:', this.api);
+    return this.api.delete<any>(`schools/${id}`);
+  }
   // ✅ SAVE SESSION
   setSession(data: any) {
-  // tokens
-  localStorage.setItem('access_token', data.access_token);
-  this._accessToken.set(data.access_token);
+    // tokens
+    localStorage.setItem('access_token', data.access_token);
+    this._accessToken.set(data.access_token);
 
-  // user
-  localStorage.setItem('user', JSON.stringify(data.user));
-  this._user.set(data.user);
+    // user
+    localStorage.setItem('user', JSON.stringify(data.user));
+    this._user.set(data.user);
 
-  // load modules list
-  this.moduleService.load();
+    // load modules list
+    this.moduleService.load();
 
-  // 🔥 NOW load permissions
-  this.loadPermissionsByRole(data.user.role_id);
-}
+    // 🔥 NOW load permissions
+    this.loadPermissionsByRole(data.user.role_id);
+  }
 
-loadPermissionsByRole(roleId: number) {
-  this.api
-    .get<any>(`module-permissions?role_id=${roleId}`)
-    .subscribe({
-      next: (res) => {
-        const permissions = res?.data?.permissions ?? [];
+  loadPermissionsByRole(roleId: number) {
+    this.api
+      .get<any>(`module-permissions?role_id=${roleId}`)
+      .subscribe({
+        next: (res) => {
+          const permissions = res?.data?.permissions ?? [];
 
-        // persist
-        localStorage.setItem('permissions', JSON.stringify(permissions));
+          // persist
+          localStorage.setItem('permissions', JSON.stringify(permissions));
 
-        // update signal (THIS FIXES SIDEBAR)
-        this._permissions.set(permissions);
-      },
-      error: () => {
-        console.error('Failed to load permissions');
-        this._permissions.set([]);
-      }
-    });
-}
+          // update signal (THIS FIXES SIDEBAR)
+          this._permissions.set(permissions);
+        },
+        error: () => {
+          console.error('Failed to load permissions');
+          this._permissions.set([]);
+        }
+      });
+  }
 
 
 
