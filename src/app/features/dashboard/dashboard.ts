@@ -7,7 +7,7 @@ import { School } from "./school/school";
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Roles, School],
+  imports: [Roles, School, Classes],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

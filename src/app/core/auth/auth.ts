@@ -91,6 +91,28 @@ export class AuthService {
     console.log('API URL:', this.api);
     return this.api.delete<any>(`schools/${id}`);
   }
+    getClasses() {
+    console.log('API URL:', this.api);
+    return this.api.get<any>('classes');
+  }
+
+  // CREATE class
+  createClass(payload: any) {
+    console.log('API URL:', this.api);
+    return this.api.post<any>('classes', payload);
+  }
+
+  // UPDATE class
+  updateClass(id: string, payload: any) {
+    console.log('API URL:', this.api);
+    return this.api.put<any>(`classes/${id}`, payload);
+  }
+
+  // DELETE class
+  deleteClass(id: string) {
+    console.log('API URL:', this.api);
+    return this.api.delete<any>(`classes/${id}`);
+  }
   // ✅ SAVE SESSION
   setSession(data: any) {
     // tokens

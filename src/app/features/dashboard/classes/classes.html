@@ -1,1 +1,106 @@
-<p>classes works!</p>
+<div class="page">
+
+  <h2>📚 Class Management</h2>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span>🔍</span>
+      <input
+        type="text"
+        placeholder="Search class, section, subject..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+    </div>
+
+    <button class="btn primary" (click)="openAdd()">+ Add Class</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>Section</th>
+          <th>Faculty</th>
+          <th>Students</th>
+          <th>Subjects</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let c of paginatedClasses">
+          <td>{{ c.class_name }}</td>
+          <td>{{ c.section }}</td>
+          <td>{{ c.faculty_id }}</td>
+          <td>{{ c.total_students }}</td>
+          <td>{{ c.subjects_covered }}</td>
+          <td>
+            <span class="badge" [class.active]="c.status === 'active'">
+              {{ c.status }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="edit" (click)="openEdit(c)">Edit</button>
+            <button class="delete" (click)="delete(c.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedClasses.length">
+          <td colspan="7" class="empty">No records found</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="pages.length > 1">
+      <button
+        class="nav"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)">‹</button>
+
+      <button
+        *ngFor="let p of pages"
+        [class.active]="currentPage === p"
+        (click)="changePage(p)">
+        {{ p }}
+      </button>
+
+      <button
+        class="nav"
+        [disabled]="currentPage === pages.length"
+        (click)="changePage(currentPage + 1)">›</button>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal" *ngIf="showModal">
+    <div class="modal-content">
+      <h3>{{ editId ? 'Edit Class' : 'Add Class' }}</h3>
+
+      <form [formGroup]="classForm" (ngSubmit)="save()">
+        <input formControlName="class_name" placeholder="Class Name" />
+        <input formControlName="section" placeholder="Section" />
+        <input formControlName="faculty_id" placeholder="Faculty ID" />
+        <input formControlName="total_students" placeholder="Total Students" />
+        <textarea formControlName="subjects_covered" placeholder="Subjects Covered"></textarea>
+
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        <div class="modal-actions">
+          <button class="btn primary" type="submit">
+            {{ editId ? 'Update' : 'Add' }}
+          </button>
+          <button class="btn" type="button" (click)="showModal=false">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

@@ -1,150 +1,183 @@
 <div class="card">
 
-  <!-- Header -->
-  <div class="header">
-    <h2>Schools</h2>
+    <!-- Header -->
+    <div class="header">
+        <h2>Schools</h2>
 
-    <div class="header-actions">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search schools..."
-        [(ngModel)]="searchText"
-        (input)="applyFilter()"
-      />
-      <button class="btn primary" (click)="openAdd()">+ Add School</button>
+        <div class="header-actions">
+            <input type="text" class="search-input" placeholder="Search schools..." [(ngModel)]="searchText"
+                (input)="applyFilter()" />
+            <button class="btn primary" (click)="openAdd()">+ Add School</button>
+        </div>
     </div>
-  </div>
 
-  <!-- Table -->
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Logo</th>
-          <th>School</th>
-          <th>Code</th>
-          <th>Type</th>
-          <th>Management</th>
-          <th>Chairman</th>
-          <th>Students</th>
-          <th>Teachers</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+    <!-- Table -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Logo</th>
+                    <th>School</th>
+                    <th>Code</th>
+                    <th>Management</th>
+                    <th>Chairman</th>
+                    <th>Students</th>
+                    <th>Teachers</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-      <tbody>
-        <tr *ngFor="let school of paginatedSchools">
-          <td>{{ school.id }}</td>
-          <td>
-            <img
-              *ngIf="school.logo"
-              [src]="apiBaseUrl + '/' + school.logo"
-              class="school-logo"
-              alt="logo"
-            />
-          </td>
-          <td>{{ school.school_name }}</td>
-          <td>{{ school.school_code }}</td>
-          <td>{{ school.type }}</td>
-          <td>{{ school.management }}</td>
-          <td>{{ school.chairman_name }}</td>
-          <td>{{ school.total_students }}</td>
-          <td>{{ school.total_teachers }}</td>
-          <td>
-            <span class="status" [class.active]="school.status === 'active'">
-              {{ school.status }}
-            </span>
-          </td>
-          <td class="actions-col">
-            <button class="btn outline" (click)="openEdit(school)">Edit</button>
-            <button class="btn danger" (click)="delete(school.id)">Delete</button>
-          </td>
-        </tr>
+            <tbody>
+                <tr *ngFor="let school of paginatedSchools">
+                    <td>{{ school.id }}</td>
+                    <td>
+                        <img *ngIf="school.logo" [src]="apiBaseUrl + '/' + school.logo" class="school-logo"
+                            alt="logo" />
+                    </td>
+                    <td>{{ school.school_name }}</td>
+                    <td>{{ school.school_code }}</td>
+                    <td>{{ school.management }}</td>
+                    <td>{{ school.chairman_name }}</td>
+                    <td>{{ school.total_students }}</td>
+                    <td>{{ school.total_teachers }}</td>
+                    <td>
+                        <span class="status" [class.active]="school.status === 'active'">
+                            {{ school.status }}
+                        </span>
+                    </td>
+                    <td class="actions-col">
+                        <button class="btn outline" (click)="openEdit(school)">Edit</button>
+                        <button class="btn danger" (click)="delete(school.id)">Delete</button>
+                    </td>
+                </tr>
 
-        <tr *ngIf="!paginatedSchools.length">
-          <td colspan="11" class="no-data">No schools found</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+                <tr *ngIf="!paginatedSchools.length">
+                    <td colspan="11" class="no-data">No schools found</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-  <!-- Pagination -->
-  <div class="pagination">
-    <button
-      class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">
-      Prev
-    </button>
+    <!-- Pagination -->
+    <div class="pagination">
+        <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+            Prev
+        </button>
 
-    <span>Page {{ currentPage }} of {{ totalPages() }}</span>
+        <span>Page {{ currentPage }} of {{ totalPages() }}</span>
 
-    <button
-      class="btn outline"
-      [disabled]="currentPage === totalPages() || totalPages() === 0"
-      (click)="changePage(currentPage + 1)">
-      Next
-    </button>
-  </div>
+        <button class="btn outline" [disabled]="currentPage === totalPages() || totalPages() === 0"
+            (click)="changePage(currentPage + 1)">
+            Next
+        </button>
+    </div>
 </div>
 
 <!-- Modal -->
 <div class="modal" *ngIf="showModal">
-  <div class="modal-content">
-    <h3>{{ editId ? 'Edit School' : 'Add School' }}</h3>
+    <div class="modal-content">
 
-    <form [formGroup]="schoolForm" class="school-form">
+        <!-- Header -->
+        <h3>{{ editId ? 'Edit School' : 'Add School' }}</h3>
 
-      <label>School Name</label>
-      <input formControlName="school_name" />
+        <!-- Form -->
+        <form [formGroup]="schoolForm" class="school-form">
 
-      <label>School Code</label>
-      <input formControlName="school_code" />
+            <div>
+                <label>School Name</label>
+                <input formControlName="school_name" />
+            </div>
 
-      <label>Address</label>
-      <textarea formControlName="address"></textarea>
+            <div>
+                <label>School Code</label>
+                <input formControlName="school_code" />
+            </div>
 
-      <label>Type</label>
-      <input formControlName="type" />
+            <div class="full">
+                <label>Address</label>
+                <textarea formControlName="address"></textarea>
+            </div>
 
-      <label>Management</label>
-      <input formControlName="management" />
+            <div>
+                <label>Management</label>
+                <select formControlName="management">
+                    <option value="">Select Management</option>
+                    <option value="Government">Government</option>
+                    <option value="Private">Private</option>
+                    <option value="Aided">Aided</option>
+                    <option value="Unaided">Unaided</option>
+                    <option value="Municipal">Municipal</option>
+                    <option value="NGO">NGO</option>
+                </select>
+            </div>
 
-      <label>Chairman Name</label>
-      <input formControlName="chairman_name" />
 
-      <label>Contact Number</label>
-      <input formControlName="contact_number" />
+            <div>
+                <label>Chairman Name</label>
+                <input formControlName="chairman_name" />
+            </div>
 
-      <label>Email</label>
-      <input type="email" formControlName="email" />
+            <div>
+                <label>Contact Number</label>
+                <input formControlName="contact_number" />
+            </div>
 
-      <label>Total Students</label>
-      <input type="number" formControlName="total_students" />
+            <div>
+                <label>Email</label>
+                <input type="email" formControlName="email" />
+            </div>
 
-      <label>Total Teachers</label>
-      <input type="number" formControlName="total_teachers" />
+            <div>
+                <label>Total Students</label>
+                <input type="number" formControlName="total_students" />
+            </div>
 
-      <label>Established Year</label>
-      <input type="number" formControlName="established_year" />
+            <div>
+                <label>Total Teachers</label>
+                <input type="number" formControlName="total_teachers" />
+            </div>
 
-      <label>Status</label>
-      <select formControlName="status">
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
+            <div>
+                <label>Established Year</label>
+                <input type="number" formControlName="established_year" />
+            </div>
+            <div>
+                <div>
+                    <label>Type</label>
+                    <select formControlName="type">
+                        <option value="">Select Type</option>
+                        <option value="Primary">Primary</option>
+                        <option value="Secondary">Secondary</option>
+                        <option value="High School">High School</option>
+                    </select>
+                </div>
+            </div>
 
-      <label>Logo URL</label>
-      <input formControlName="logo" placeholder="Enter logo URL" />
 
-    </form>
+            <div class="full">
+                <label>Status</label>
+                <select formControlName="status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
 
-    <div class="actions">
-      <button class="btn outline" (click)="showModal=false">Cancel</button>
-      <button class="btn primary" (click)="save()">Save</button>
+            <div class="full">
+                <label>Logo</label>
+                <input type="file" accept="image/*" (change)="onLogoChange($event)" />
+
+                <img *ngIf="logoPreview" [src]="logoPreview" class="school-logo" />
+            </div>
+
+        </form>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn outline" (click)="showModal=false">Cancel</button>
+            <button class="btn primary" (click)="save()">Save</button>
+        </div>
+
     </div>
-  </div>
 </div>

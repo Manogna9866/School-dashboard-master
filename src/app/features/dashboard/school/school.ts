@@ -15,6 +15,8 @@ export class School {
   schools: any[] = [];
   filteredSchools: any[] = [];
   paginatedSchools: any[] = [];
+  selectedLogoFile: File | null = null;
+  logoPreview: string | null = null;
 
   showModal = false;
   editId: string | null = null;
@@ -37,13 +39,14 @@ export class School {
       school_code: ['', Validators.required],
       address: ['', Validators.required],
       type: ['', Validators.required],
-      management: ['', Validators.required],
+      management: [],
       chairman_name: ['', Validators.required],
       contact_number: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       total_students: ['', Validators.required],
       total_teachers: ['', Validators.required],
       established_year: ['', Validators.required],
+
       status: ['active', Validators.required],
       logo: [''] // can be URL or file
     });
@@ -102,46 +105,148 @@ export class School {
   openAdd() {
     this.editId = null;
     this.schoolForm.reset({ status: 'active' });
+    this.selectedLogoFile = null;
+    this.logoPreview = null;
     this.showModal = true;
   }
 
+
   openEdit(school: any) {
     this.editId = school.id;
-    this.schoolForm.patchValue(school);
+
+    this.schoolForm = this.fb.group({
+      school_name: ['', Validators.required],
+      school_code: ['', Validators.required],
+      address: ['', Validators.required],
+      type: ['', Validators.required],
+      management: ['', Validators.required],
+      chairman_name: ['', Validators.required],
+      contact_number: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      total_students: ['', Validators.required],
+      total_teachers: ['', Validators.required],
+      established_year: ['', Validators.required],
+      status: ['active', Validators.required],
+      logo: ['']
+    });
+
+
+    this.logoPreview = school.logo
+      ? this.apiBaseUrl + '/' + school.logo
+      : null;
+
+    this.selectedLogoFile = null;
     this.showModal = true;
+  }
+
+
+  onLogoChange(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.selectedLogoFile = file;
+
+    // preview
+    const reader = new FileReader();
+    reader.onload = () => (this.logoPreview = reader.result as string);
+    reader.readAsDataURL(file);
   }
 
   /* ---------------- SAVE ---------------- */
   save() {
+    console.log('SAVE triggered');
+
     if (this.schoolForm.invalid) {
+      console.warn('Form is invalid', this.schoolForm.value);
       this.notify.error('All fields are required');
       return;
     }
 
     this.loading = true;
+    console.log('Form is valid, starting save process');
 
-    const request$ = this.editId
-      ? this.schoolsService.updateSchool(this.editId, this.schoolForm.value)
-      : this.schoolsService.createSchool(this.schoolForm.value);
+    const formData = new FormData();
 
-    request$.subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.notify.success(res.message || 'School saved successfully');
-          this.showModal = false;
-          this.schoolForm.reset();
-          this.loadSchools();
-        } else {
-          this.notify.error(res.message || 'Operation failed');
-        }
-        this.loading = false;
-      },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
+    Object.keys(this.schoolForm.value).forEach(key => {
+      if (key !== 'logo') {
+        const value = this.schoolForm.value[key];
+        console.log(`Appending field: ${key}`, value);
+        formData.append(key, value);
       }
     });
+
+    if (this.selectedLogoFile) {
+      console.log('Appending logo file', this.selectedLogoFile);
+      formData.append('logo', this.selectedLogoFile);
+    } else {
+      console.log('No logo file selected');
+    }
+
+    // ---------- CREATE / UPDATE ----------
+    if (this.editId) {
+      console.log('UPDATE flow started. ID:', this.editId);
+
+      this.schoolsService.updateSchool(this.editId, formData).subscribe({
+        next: (res) => {
+          console.log('Update response:', res);
+
+          if (res?.success) {
+            this.notify.success(res.message || 'School updated successfully');
+            this.afterSaveSuccess();
+          } else {
+            console.error('Update failed:', res);
+            this.notify.error(res.message || 'Update failed');
+          }
+
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Update API error:', error);
+          this.notify.error('Server error');
+          this.loading = false;
+        }
+      });
+
+    } else {
+      console.log('CREATE flow started');
+
+      this.schoolsService.createSchool(formData).subscribe({
+        next: (res) => {
+          console.log('Create response:', res);
+
+          if (res?.success) {
+            this.notify.success(res.message || 'School created successfully');
+            this.afterSaveSuccess();
+          } else {
+            console.error('Create failed:', res);
+            this.notify.error(res.message || 'Create failed');
+          }
+
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Create API error:', error);
+          this.notify.error('Server error');
+          this.loading = false;
+        }
+      });
+    }
   }
+
+  /* ---------- COMMON SUCCESS HANDLER ---------- */
+  private afterSaveSuccess() {
+    console.log('Resetting form & closing modal');
+
+    this.showModal = false;
+    this.schoolForm.reset({ status: 'active' });
+    this.logoPreview = null;
+    this.selectedLogoFile = null;
+
+    this.loadSchools();
+  }
+
+
+
 
   /* ---------------- DELETE ---------------- */
   delete(id: string) {
