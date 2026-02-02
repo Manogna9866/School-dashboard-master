@@ -1,0 +1,150 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Timetable</h2>
+
+    <div class="header-actions">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search timetable..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Timetable</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Class</th>
+          <th>Day</th>
+          <th>Period</th>
+          <th>Subject</th>
+          <th>Faculty</th>
+          <th>Time</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let t of paginatedTimetables">
+          <td>{{ t.id }}</td>
+          <td>{{ t.class_id }}</td>
+          <td>{{ t.day_of_week }}</td>
+          <td>{{ t.period_number }}</td>
+          <td>{{ t.subject }}</td>
+          <td>{{ t.faculty_id }}</td>
+          <td>{{ t.start_time }} - {{ t.end_time }}</td>
+          <td>
+            <span class="status" [class.active]="t.status === 'active'">
+              {{ t.status }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(t)">Edit</button>
+            <button class="btn danger" (click)="delete(t.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedTimetables.length">
+          <td colspan="9" class="no-data">No timetable found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">
+      Prev
+    </button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">
+      Next
+    </button>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Timetable' : 'Add Timetable' }}</h3>
+
+    <form [formGroup]="timetableForm" class="school-form">
+
+      <div>
+        <label>Class</label>
+        <input formControlName="class_id" />
+      </div>
+
+      <div>
+        <label>Day</label>
+        <select formControlName="day_of_week">
+          <option value="">Select</option>
+          <option>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Period</label>
+        <input formControlName="period_number" />
+      </div>
+
+      <div>
+        <label>Subject</label>
+        <input formControlName="subject" />
+      </div>
+
+      <div>
+        <label>Faculty</label>
+        <input formControlName="faculty_id" />
+      </div>
+
+      <div>
+        <label>Start Time</label>
+        <input type="time" formControlName="start_time" />
+      </div>
+
+      <div>
+        <label>End Time</label>
+        <input type="time" formControlName="end_time" />
+      </div>
+
+      <div class="full">
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+

@@ -1,0 +1,147 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Branches</h2>
+
+    <div class="header-actions">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search branches..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Branch</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Branch Code</th>
+          <th>Branch Name</th>
+          <th>Principal</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let b of paginatedBranches">
+          <td>{{ b.id }}</td>
+          <td>{{ b.branch_code }}</td>
+          <td>{{ b.branch_name }}</td>
+          <td>{{ b.principal_name }}</td>
+          <td>{{ b.contact_phone }}</td>
+          <td>{{ b.contact_email }}</td>
+          <td>
+            <span class="status" [class.active]="b.status === 'active'">
+              {{ b.status }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(b)">Edit</button>
+            <button class="btn danger" (click)="delete(b.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedBranches.length">
+          <td colspan="8" class="no-data">No branches found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button
+      class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">
+      Prev
+    </button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button
+      class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">
+      Next
+    </button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Branch' : 'Add Branch' }}</h3>
+
+    <form [formGroup]="branchForm" class="school-form">
+
+      <div>
+        <label>Branch Code</label>
+        <input formControlName="branch_code" />
+      </div>
+
+      <div>
+        <label>Branch Name</label>
+        <input formControlName="branch_name" />
+      </div>
+
+      <div>
+        <label>Principal Name</label>
+        <input formControlName="principal_name" />
+      </div>
+
+      <div>
+        <label>Contact Phone</label>
+        <input formControlName="contact_phone" />
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input formControlName="contact_email" />
+      </div>
+
+      <div>
+        <label>Established Year</label>
+        <input formControlName="established_year" />
+      </div>
+
+      <div class="full">
+        <label>Address</label>
+        <textarea formControlName="address"></textarea>
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+      <div class="full">
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+
+

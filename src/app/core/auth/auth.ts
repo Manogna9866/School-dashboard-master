@@ -53,24 +53,19 @@ export class AuthService {
   }
   //roles//
   createRole(payload: { role_name: string; description: string }) {
-    console.log('API URL:', this.api);
     return this.api.post<any>('roles', payload);
   }
   updateRole(id: string, payload: { role_name: string; description: string }) {
-    console.log('API URL:', this.api);
     return this.api.put<any>(`roles/${id}`, payload);
   }
   deleteRole(id: string) {
-    console.log('API URL:', this.api);
     return this.api.delete<any>(`roles/${id}`);
   }
   getRoles() {
-    console.log('API URL:', this.api);
     return this.api.get<any>('roles');
   }
   //schools//
   getSchools() {
-    console.log('API URL:', this.api);
     return this.api.get<any>('schools');
   }
 
@@ -91,7 +86,7 @@ export class AuthService {
     console.log('API URL:', this.api);
     return this.api.delete<any>(`schools/${id}`);
   }
-    getClasses() {
+  getClasses() {
     console.log('API URL:', this.api);
     return this.api.get<any>('classes');
   }
@@ -112,6 +107,65 @@ export class AuthService {
   deleteClass(id: string) {
     console.log('API URL:', this.api);
     return this.api.delete<any>(`classes/${id}`);
+  }
+
+  //braches//
+  getBranches() {
+    return this.api.get<any>('branches');
+  }
+
+  // CREATE a branch
+  createBranch(payload: any) {
+    return this.api.post<any>('branches', payload);
+  }
+
+  // UPDATE a branch
+  updateBranch(id: string, payload: any) {
+    return this.api.put<any>(`branches/${id}`, payload);
+  }
+
+  // DELETE a branch
+  deleteBranch(id: string) {
+    return this.api.delete<any>(`branches/${id}`);
+  }
+  //faculty//
+  getfaculties() {
+    return this.api.get<any>('faculty');
+  }  
+  createfaculty(payload: any) {
+    return this.api.post<any>('faculty', payload);
+  }  
+  updatefaculty(id: string, payload: any) {
+    return this.api.put<any>(`faculty/${id}`, payload);
+  }  
+  deletefaculty(id: string) {
+    return this.api.delete<any>(`faculty/${id}`);
+  }
+  //timetable//
+  getTimetables() {
+    return this.api.get<any>('timetable');
+  }  
+  createTimetable(payload: any) {
+    return this.api.post<any>('timetable', payload);
+  }  
+  updateTimetable(id: string, payload: any) {
+    return this.api.put<any>(`timetable/${id}`, payload);
+  }  
+  deleteTimetable(id: string) {
+    return this.api.delete<any>(`timetable/${id}`);
+  }
+  //
+  getstudents() {
+    return this.api.get<any>('students');
+  }  
+  createstudent(payload: any) {
+    return this.api.post<any>('students', payload);
+  }  
+  updatestudent(id: string, payload: any) {
+    return this.api.put<any>(`students/${id}`, payload);
+  }  
+  deletestudent(id: string) {
+    return this.api.delete<any>(`students/${id}`);
   }
   // ✅ SAVE SESSION
   setSession(data: any) {

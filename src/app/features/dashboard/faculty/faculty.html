@@ -1,0 +1,139 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Faculty</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search faculty..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Faculty</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Gender</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Joining Date</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let f of paginatedFaculty">
+          <td>{{ f.id }}</td>
+          <td>{{ f.first_name }} {{ f.last_name }}</td>
+          <td>{{ f.gender }}</td>
+          <td>{{ f.email }}</td>
+          <td>{{ f.phone_number }}</td>
+          <td>{{ f.joining_date }}</td>
+          <td>
+            <span class="status" [class.active]="f.status === 'active'">
+              {{ f.status }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(f)">Edit</button>
+            <button class="btn danger" (click)="delete(f.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedFaculty.length">
+          <td colspan="8" class="no-data">No faculty found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline" [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Faculty' : 'Add Faculty' }}</h3>
+
+    <form [formGroup]="facultyForm" class="school-form">
+
+      <div>
+        <label>First Name</label>
+        <input formControlName="first_name" />
+      </div>
+
+      <div>
+        <label>Last Name</label>
+        <input formControlName="last_name" />
+      </div>
+
+      <div>
+        <label>Gender</label>
+        <select formControlName="gender">
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input formControlName="email" />
+      </div>
+
+      <div>
+        <label>Phone</label>
+        <input formControlName="phone_number" />
+      </div>
+
+      <div>
+        <label>Joining Date</label>
+        <input type="date" formControlName="joining_date" />
+      </div>
+
+      <div class="full">
+        <label>Address</label>
+        <textarea formControlName="address"></textarea>
+      </div>
+
+      <div class="full">
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+
