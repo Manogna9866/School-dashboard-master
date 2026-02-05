@@ -1,0 +1,137 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Attendance</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search attendance..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">
+        + Add Attendance
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Student</th>
+          <th>Status</th>
+          <th>Percentage</th>
+          <th>Remarks</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let a of paginatedAttendance">
+          <td>{{ a.id }}</td>
+          <td>{{ a.date }}</td>
+          <td>{{ a.student_id }}</td>
+          <td>
+            <span class="status" [class.active]="a.status === 'Present'">
+              {{ a.status }}
+            </span>
+          </td>
+          <td>{{ a.percentage_report }}</td>
+          <td>{{ a.remarks }}</td>
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(a)">Edit</button>
+            <button class="btn danger" (click)="delete(a.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedAttendance.length">
+          <td colspan="7" class="no-data">No attendance found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button
+      class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">
+      Prev
+    </button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button
+      class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">
+      Next
+    </button>
+  </div>
+
+</div>
+
+<!-- ================= ATTENDANCE MODAL ================= -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Attendance' : 'Add Attendance' }}</h3>
+
+    <form [formGroup]="attendanceForm" class="school-form">
+
+      <div>
+        <label>Date</label>
+        <input type="date" formControlName="date" />
+      </div>
+
+      <div>
+        <label>Student ID</label>
+        <input type="text" formControlName="student_id" />
+      </div>
+
+      <div>
+        <label>Faculty ID</label>
+        <input type="text" formControlName="faculty_id" />
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="">Select Status</option>
+          <option value="Present">Present</option>
+          <option value="Absent">Absent</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Percentage</label>
+        <input type="number" formControlName="percentage_report" />
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal = false">
+        Cancel
+      </button>
+
+      <button class="btn primary" (click)="save()">
+        Save
+      </button>
+    </div>
+
+  </div>
+</div>

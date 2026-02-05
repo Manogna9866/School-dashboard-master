@@ -1,0 +1,158 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Notifications</h2>
+
+    <div class="header-actions">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search notifications..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Notification</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Message</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let n of paginatedNotifications">
+          <td>{{ n.id }}</td>
+          <td>{{ n.title }}</td>
+          <td>{{ n.message }}</td>
+          <td>{{ n.date_time }}</td>
+          <td>{{ n.type }}</td>
+          <td>
+            <span class="status" [class.active]="n.status === 'Unread'">
+              {{ n.status }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(n)">Edit</button>
+            <button class="btn danger" (click)="delete(n.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedNotifications.length">
+          <td colspan="7" class="no-data">No notifications found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+            [disabled]="currentPage === 1"
+            (click)="changePage(currentPage - 1)">
+      Prev
+    </button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+            [disabled]="currentPage === pages.length || pages.length === 0"
+            (click)="changePage(currentPage + 1)">
+      Next
+    </button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Notification' : 'Add Notification' }}</h3>
+
+    <form [formGroup]="notificationForm" class="school-form">
+
+     
+
+      <div>
+        <label>School ID</label>
+        <input formControlName="school_id" />
+      </div>
+
+      <div>
+        <label>Branch ID</label>
+        <input formControlName="branch_id" />
+      </div>
+
+      <div>
+        <label>Class ID</label>
+        <input formControlName="class_id" />
+      </div>
+
+      <div>
+        <label>Title</label>
+        <input formControlName="title" />
+      </div>
+
+      <div class="full">
+        <label>Message</label>
+        <textarea formControlName="message"></textarea>
+      </div>
+
+      <div>
+        <label>Date Time</label>
+        <input type="datetime-local" formControlName="date_time" />
+      </div>
+
+      <div>
+        <label>Recipient Type</label>
+        <select formControlName="recipient_type">
+          <option value="">Select</option>
+          <option value="Parents">Parents</option>
+          <option value="Teachers">Teachers</option>
+          <option value="Students">Students</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Notification Type</label>
+        <select formControlName="type">
+          <option value="">Select</option>
+          <option value="event">Event</option>
+          <option value="notice">Notice</option>
+          <option value="alert">Alert</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="">Select</option>
+          <option value="Unread">Unread</option>
+          <option value="Read">Read</option>
+        </select>
+      </div>
+
+     
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+
+

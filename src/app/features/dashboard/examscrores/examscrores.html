@@ -1,0 +1,128 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Exam Scores</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search exam scores..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Score</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Exam</th>
+          <th>Marks</th>
+          <th>Grade</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let s of paginatedExamScores">
+          <td>{{ s.id }}</td>
+          <td>{{ s.student_id }}</td>
+          <td>{{ s.exam_id }}</td>
+          <td>{{ s.marks_obtained }}</td>
+          <td>{{ s.grade }}</td>
+          <td>
+            <span class="status" [class.active]="s.result_status === 'Pass'">
+              {{ s.result_status }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(s)">Edit</button>
+            <button class="btn danger" (click)="delete(s.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedExamScores.length">
+          <td colspan="7" class="no-data">No exam scores found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">
+      Prev
+    </button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">
+      Next
+    </button>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Exam Score' : 'Add Exam Score' }}</h3>
+
+    <form [formGroup]="examScoreForm" class="school-form">
+
+      <div>
+        <label>Exam ID</label>
+        <input formControlName="exam_id" />
+      </div>
+
+      <div>
+        <label>Student ID</label>
+        <input formControlName="student_id" />
+      </div>
+
+      <div>
+        <label>Marks Obtained</label>
+        <input formControlName="marks_obtained" />
+      </div>
+
+      <div>
+        <label>Grade</label>
+        <input formControlName="grade" />
+      </div>
+
+      <div>
+        <label>Result Status</label>
+        <select formControlName="result_status">
+          <option value="">Select</option>
+          <option value="Pass">Pass</option>
+          <option value="Fail">Fail</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>

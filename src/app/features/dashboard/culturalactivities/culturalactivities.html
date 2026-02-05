@@ -1,0 +1,85 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Cultural Activities</h2>
+    <div class="header-actions">
+      <input type="text" class="search-input" placeholder="Search..." [(ngModel)]="searchText" (input)="applyFilter()" />
+      <button class="btn primary" (click)="openAdd()">+ New Activity</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="state" *ngIf="loading">Loading...</div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper" *ngIf="!loading && activities.length">
+    <table>
+      <thead>
+        <tr>
+          <th>Event Name</th>
+          <th>Category</th>
+          <th>Date & Time</th>
+          <th>Venue</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of paginatedActivities">
+          <td>{{ a.event_name }}</td>
+          <td>{{ a.category }}</td>
+          <td>{{ a.date_time }}</td>
+          <td>{{ a.venue }}</td>
+          <td>
+            <span class="status" [class.active]="a.status === 'ongoing'">{{ a.status }}</span>
+          </td>
+          <td>
+            <button class="btn outline" (click)="openEdit(a)">Edit</button>
+            <button class="btn danger" (click)="delete(a.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="state" *ngIf="!loading && !activities.length">No activities found</div>
+
+  <!-- PAGINATION -->
+  <div class="pagination" *ngIf="pages.length > 1">
+    <button class="btn outline" [disabled]="currentPage===1" (click)="changePage(currentPage-1)">Prev</button>
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+    <button class="btn outline" [disabled]="currentPage===pages.length" (click)="changePage(currentPage+1)">Next</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+    <h3>{{ editId ? 'Edit Activity' : 'Add Activity' }}</h3>
+    <form [formGroup]="culturalForm" class="form-grid">
+
+      <div><label>Event Name</label><input formControlName="event_name" /></div>
+      <div><label>Category</label><input formControlName="category" /></div>
+      <div><label>Date & Time</label><input type="datetime-local" formControlName="date_time" /></div>
+      <div><label>Venue</label><input formControlName="venue" /></div>
+      <div><label>Status</label>
+        <select formControlName="status">
+          <option value="upcoming">Upcoming</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="full"><label>Description</label><textarea formControlName="description"></textarea></div>
+      <div><label>Coordinator</label><input formControlName="coordinator_name" /></div>
+      <div><label>Awards/Recognitions</label><input formControlName="awards_recognitions" /></div>
+      <div><label>Attachment</label><input type="file" (change)="onFileSelected($event)" /></div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+  </div>
+</div>

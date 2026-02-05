@@ -131,41 +131,122 @@ export class AuthService {
   //faculty//
   getfaculties() {
     return this.api.get<any>('faculty');
-  }  
+  }
   createfaculty(payload: any) {
     return this.api.post<any>('faculty', payload);
-  }  
+  }
   updatefaculty(id: string, payload: any) {
     return this.api.put<any>(`faculty/${id}`, payload);
-  }  
+  }
   deletefaculty(id: string) {
     return this.api.delete<any>(`faculty/${id}`);
   }
   //timetable//
   getTimetables() {
     return this.api.get<any>('timetable');
-  }  
+  }
   createTimetable(payload: any) {
     return this.api.post<any>('timetable', payload);
-  }  
+  }
   updateTimetable(id: string, payload: any) {
     return this.api.put<any>(`timetable/${id}`, payload);
-  }  
+  }
   deleteTimetable(id: string) {
     return this.api.delete<any>(`timetable/${id}`);
   }
   //
   getstudents() {
     return this.api.get<any>('students');
-  }  
+  }
   createstudent(payload: any) {
     return this.api.post<any>('students', payload);
-  }  
+  }
   updatestudent(id: string, payload: any) {
     return this.api.put<any>(`students/${id}`, payload);
-  }  
+  }
   deletestudent(id: string) {
     return this.api.delete<any>(`students/${id}`);
+  }
+  //attetendence//
+  getattendences() {
+    return this.api.get<any>('attendance');
+  }
+  createattendence(payload: any) {
+    return this.api.post<any>('attendance', payload);
+  }
+  updateattendence(id: string, payload: any) {
+    return this.api.put<any>(`attendance/${id}`, payload);
+  }
+  deleteattendence(id: string) {
+    return this.api.delete<any>(`attendance/${id}`);
+  }
+  //examcrores//
+  getexamscrores() {
+    return this.api.get<any>('exam_scores');
+  }
+  createexamscrore(payload: any) {
+    return this.api.post<any>('exam_scores', payload);
+  }
+  updateexamscrore(id: string, payload: any) {
+    return this.api.put<any>(`exam_scores/${id}`, payload);
+  }
+  deleteexamscrore(id: string) {
+    return this.api.delete<any>(`exam_scores/${id}`);
+  }
+  //progess-cards//
+  getprogresscards() {
+    return this.api.get<any>('progress_cards');
+  }
+  createprogresscard(payload: any) {
+    return this.api.post<any>('progress_cards', payload);
+  }
+  updateprogresscard(id: string, payload: any) {
+    return this.api.put<any>(`progress_cards/${id}`, payload);
+  }
+  deleteprogresscard(id: string) {
+    return this.api.delete<any>(`progress_cards/${id}`);
+  }
+  //assignment-homeworks//
+  getassignmentshomeworks() {
+    return this.api.get<any>('assignments_homework');
+  }
+  createassignmentshomework(payload: any) {
+    return this.api.post<any>('assignments_homework', payload);
+  }
+  updateassignmentshomework(id: string, payload: any) {
+    return this.api.put<any>(`assignments_homework/${id}`, payload);
+  }
+  deleteassignmentshomework(id: string) {
+    return this.api.delete<any>(`assignments_homework/${id}`);
+  }
+  //notifications//
+  getnotifications() {
+    return this.api.get<any>('notifications');
+  }
+  createnotification(payload: any) {
+    return this.api.post<any>('notifications', payload);
+  }
+  updatenotification(id: string, payload: any) {
+    return this.api.put<any>(`notifications/${id}`, payload);
+  }
+  deletenotification(id: string) {
+    return this.api.delete<any>(`notifications/${id}`);
+  }
+  //culuturalactivties//
+  getculturalactivities() {
+    return this.api.get<any>('cultural_activities');
+  }
+
+  createculturalactivity(payload: any) {
+    return this.api.post<any>('cultural_activities', payload);
+  }
+
+
+  updateculturalactivity(id: string, payload: any) {
+    return this.api.put<any>(`cultural_activities/${id}`, payload);
+  }
+  deleteculturalactivity(id: string) {
+    return this.api.delete<any>(`cultural_activities/${id}`);
   }
   // ✅ SAVE SESSION
   setSession(data: any) {

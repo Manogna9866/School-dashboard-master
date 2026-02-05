@@ -7,11 +7,17 @@ import { Branches } from "./branches/branches";
 import { Faculty } from "./faculty/faculty";
 import { Timetable } from "./timetable/timetable";
 import { Students } from "./students/students";
+import { Attendence } from "./attendence/attendence";
+import { Examscrores } from "./examscrores/examscrores";
+import { ProgressCards } from "./progress-cards/progress-cards";
+import { AssignmentsHomeworks } from "./assignments-homeworks/assignments-homeworks";
+import { Notifications } from "./notifications/notifications";
+import { Culturalactivities } from "./culturalactivities/culturalactivities";
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Roles, School, Classes, Branches, Faculty, Timetable, Students],
+  imports: [Students, Attendence, Examscrores, ProgressCards, AssignmentsHomeworks, Notifications, Culturalactivities],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
