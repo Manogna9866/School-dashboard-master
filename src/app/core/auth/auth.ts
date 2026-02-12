@@ -248,6 +248,96 @@ export class AuthService {
   deleteculturalactivity(id: string) {
     return this.api.delete<any>(`cultural_activities/${id}`);
   }
+  //fee-management//
+  getfees() {
+    return this.api.get<any>('fee_management');
+  }
+  createfee(payload: any) {
+    return this.api.post<any>('fee_management', payload);
+  }
+  updatefee(id: string, payload: any) {
+    return this.api.put<any>(`fee_management/${id}`, payload);
+  }
+  deletefee(id: string) {
+    return this.api.delete<any>(`fee_management/${id}`);    }
+    //librarybooks//
+  getBooks() {
+    return this.api.get<any>('library_books');
+  }
+  createBook(payload: any) {
+    return this.api.post<any>('library_books', payload);
+  }  
+  updateBook(id: string, payload: any) {
+    return this.api.put<any>(`library_books/${id}`, payload);
+  }
+  deleteBook(id: string) {
+    return this.api.delete<any>(`library_books/${id}`);
+  } 
+  //hostelrooms//
+  getHostelRooms() {
+    return this.api.get<any>('hostel_rooms');
+  }
+  createHostelRoom(payload: any) {
+    return this.api.post<any>('hostel_rooms', payload);
+  }
+  updateHostelRoom(id: string, payload: any) {
+    return this.api.put<any>(`hostel_rooms/${id}`, payload);
+  }
+  deleteHostelRoom(id: string) {
+    return this.api.delete<any>(`hostel_rooms/${id}`);
+  }  
+  //transportmanagement//
+  getTransports() {
+    return this.api.get<any>('transport');
+  }
+  createTransport(payload: any) {
+    return this.api.post<any>('transport', payload);
+  }
+  updateTransport(id: string, payload: any) {
+    return this.api.put<any>(`transport/${id}`, payload);
+  }
+  deleteTransport(id: string) {
+    return this.api.delete<any>(`transport/${id}`);
+  }
+  //medicalrecords//
+  getMedicalRecords() {
+    return this.api.get<any>('medical_records');
+  }
+  createMedicalRecord(payload: any) {
+    return this.api.post<any>('medical_records', payload);
+  }
+  updateMedicalRecord(id: string, payload: any) {
+    return this.api.put<any>(`medical_records/${id}`, payload);
+  }
+  deleteMedicalRecord(id: string) {
+    return this.api.delete<any>(`medical_records/${id}`);
+  } 
+  //librarybooks//  
+  getLibraryBookIssues() {
+    return this.api.get<any>('library_book_issue');
+  }
+  createLibraryBookIssue(payload: any) {
+    return this.api.post<any>('library_book_issue', payload);
+  }  
+  updateLibraryBookIssue(id: string, payload: any) {
+    return this.api.put<any>(`library_book_issue/${id}`, payload);
+  }
+  deleteLibraryBookIssue(id: string) {
+    return this.api.delete<any>(`library_book_issue/${id}`);
+  } 
+  //hostelallocation//
+  getHostelAllocations() {
+    return this.api.get<any>('hostel_allocations');
+  }
+  createHostelAllocation(payload: any) {
+    return this.api.post<any>('hostel_allocations', payload);
+  }
+  updateHostelAllocation(id: string, payload: any) {
+    return this.api.put<any>(`hostel_allocations/${id}`, payload);
+  }
+  deleteHostelAllocation(id: string) {
+    return this.api.delete<any>(`hostel_allocations/${id}`);
+  }                     
   // ✅ SAVE SESSION
   setSession(data: any) {
     // tokens

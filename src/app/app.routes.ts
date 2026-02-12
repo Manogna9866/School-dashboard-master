@@ -41,7 +41,12 @@ export const routes: Routes = [
               import('./features/users/users.routes')
                 .then(m => m.usersRoutes)
           },
-
+          // {
+          //   path: 'classes',
+          //   loadChildren: () =>
+          //     import('./features/classes/classes.routes')
+          //       .then(m => m.classesRoutes)
+          // },
           {
             path: '',
             pathMatch: 'full',
@@ -59,9 +64,9 @@ export const routes: Routes = [
   },
 
   {
-  path: 'unauthorized',
-  loadComponent: () =>
-    import('./features/errors/unauthorized/unauthorized')
-      .then(m => m.Unauthorized)
-}
+    path: 'unauthorized',
+    loadComponent: () =>
+      import('./features/errors/unauthorized/unauthorized')
+        .then(m => m.Unauthorized)
+  }
 ];

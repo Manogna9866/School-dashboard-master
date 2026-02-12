@@ -13,11 +13,18 @@ import { ProgressCards } from "./progress-cards/progress-cards";
 import { AssignmentsHomeworks } from "./assignments-homeworks/assignments-homeworks";
 import { Notifications } from "./notifications/notifications";
 import { Culturalactivities } from "./culturalactivities/culturalactivities";
+import { FeeManagement } from "./fee-management/fee-management";
+import { Librarymanagement } from "./librarymanagement/librarymanagement";
+import { HostelRooms } from "./hostel-rooms/hostel-rooms";
+import { TransportManagement } from "./transport-management/transport-management";
+import { Medicalrecords } from "./medicalrecords/medicalrecords";
+import { LibraryBookIssue } from "./library-book-issue/library-book-issue";
+import { HostelAllocation } from "./hostel-allocation/hostel-allocation";
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Students, Attendence, Examscrores, ProgressCards, AssignmentsHomeworks, Notifications, Culturalactivities],
+  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

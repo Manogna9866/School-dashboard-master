@@ -1,0 +1,135 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Fee Management</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search fees..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Fee</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Fee Type</th>
+          <th>Due</th>
+          <th>Paid</th>
+          <th>Status</th>
+          <th>Receipt</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let f of paginatedFees">
+          <td>{{ f.id }}</td>
+          <td>{{ f.student_id }}</td>
+          <td>{{ f.fee_type }}</td>
+          <td>{{ f.amount_due }}</td>
+          <td>{{ f.amount_paid }}</td>
+          <td>{{ f.payment_status }}</td>
+          <td>{{ f.receipt_number }}</td>
+
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(f)">Edit</button>
+            <button class="btn danger" (click)="delete(f.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedFees.length">
+          <td colspan="8" class="no-data">No fee records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+</div>
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Fee' : 'Add Fee' }}</h3>
+
+    <form [formGroup]="feeForm" class="school-form">
+
+      <div>
+        <label>Academic Year</label>
+        <input formControlName="academic_year" />
+      </div>
+
+      <div>
+        <label>Class ID</label>
+        <input formControlName="class_id" />
+      </div>
+
+      <div>
+        <label>Student ID</label>
+        <input formControlName="student_id" />
+      </div>
+
+      <div>
+        <label>Fee Type</label>
+        <input formControlName="fee_type" />
+      </div>
+
+      <div>
+        <label>Amount Due</label>
+        <input type="number" formControlName="amount_due" />
+      </div>
+
+      <div>
+        <label>Amount Paid</label>
+        <input type="number" formControlName="amount_paid" />
+      </div>
+
+      <div>
+        <label>Due Date</label>
+        <input type="date" formControlName="due_date" />
+      </div>
+
+      <div>
+        <label>Payment Status</label>
+        <select formControlName="payment_status">
+          <option>Paid</option>
+          <option>Unpaid</option>
+          <option>Partial</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>

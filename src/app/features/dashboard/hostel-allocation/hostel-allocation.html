@@ -1,0 +1,117 @@
+<div class="card">
+
+    <div class="header">
+        <h2>Hostel Allocations</h2>
+
+        <div class="header-actions">
+            <input class="search-input" type="text" placeholder="Search allocations..." [(ngModel)]="searchText"
+                (input)="applyFilter()" />
+
+            <button class="btn primary" (click)="openAdd()">+ Add Allocation</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Room</th>
+                    <th>Allocation Date</th>
+                    <th>Vacate Date</th>
+                    <th>Status</th>
+                    <th width="140">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr *ngFor="let a of paginatedAllocations">
+                    <td>{{ a.id }}</td>
+                    <td>{{ a.student_id }}</td>
+                    <td>{{ a.room_id }}</td>
+                    <td>{{ a.allocation_date }}</td>
+                    <td>{{ a.vacate_date || '-' }}</td>
+                    <td>{{ a.allocation_status }}</td>
+
+                    <td class="actions-col">
+                        <button class="btn outline" (click)="openEdit(a)">Edit</button>
+                        <button class="btn danger" (click)="delete(a.id)">Delete</button>
+                    </td>
+                </tr>
+
+                <tr *ngIf="!paginatedAllocations.length">
+                    <td colspan="7" class="no-data">No allocations found</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
+
+        <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+        <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
+            (click)="changePage(currentPage + 1)">Next</button>
+    </div>
+
+</div>
+<div class="modal" *ngIf="showModal">
+    <div class="modal-content">
+
+        <h3>{{ editId ? 'Edit Allocation' : 'Add Allocation' }}</h3>
+
+        <form [formGroup]="allocationForm">
+
+            <!-- DO NOT REMOVE -->
+            <div>
+                <label>Room ID</label>
+                <input formControlName="school_id">
+            </div>
+            <div>
+                <label>Room ID</label>
+                <input formControlName="branch_id">
+            </div>
+            <div>
+                <label>Room ID</label>
+                <input formControlName="room_id">
+            </div>
+
+            <div>
+                <label>Student ID</label>
+                <input formControlName="student_id">
+            </div>
+
+            <div>
+                <label>Allocation Date</label>
+                <input type="date" formControlName="allocation_date">
+            </div>
+
+            <div>
+                <label>Vacate Date</label>
+                <input type="date" formControlName="vacate_date">
+            </div>
+
+            <div>
+                <label>Status</label>
+                <select formControlName="allocation_status">
+                    <option value="allocated">Allocated</option>
+                    <option value="vacated">Vacated</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Remarks</label>
+                <textarea formControlName="remarks"></textarea>
+            </div>
+
+        </form>
+
+        <div class="actions">
+            <button class="btn outline" (click)="showModal=false">Cancel</button>
+            <button class="btn primary" (click)="save()">Save</button>
+        </div>
+
+    </div>
+</div>

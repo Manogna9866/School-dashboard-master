@@ -1,0 +1,144 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Library Management</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search books..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Book</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Category</th>
+          <th>ISBN</th>
+          <th>Total</th>
+          <th>Available</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let b of paginatedBooks">
+          <td>{{ b.id }}</td>
+          <td>{{ b.title }}</td>
+          <td>{{ b.author }}</td>
+          <td>{{ b.category }}</td>
+          <td>{{ b.isbn_number }}</td>
+          <td>{{ b.copies_total }}</td>
+          <td>{{ b.copies_available }}</td>
+          <td>
+            <span class="status" 
+                  [class.active]="b.availability_status === 'Available'">
+              {{ b.availability_status }}
+            </span>
+          </td>
+
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(b)">Edit</button>
+            <button class="btn danger" (click)="delete(b.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedBooks.length">
+          <td colspan="9" class="no-data">No books found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+</div>
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Book' : 'Add Book' }}</h3>
+
+    <form [formGroup]="bookForm" class="school-form">
+      <div>
+        <label>BRACH ID</label>
+        <input formControlName="branch_id" />
+      </div>
+      <div>
+        <label>School id</label>
+        <input formControlName="school_id" />
+      </div>
+      <div>
+        <label>Title</label>
+        <input formControlName="title" />
+      </div>
+
+      <div>
+        <label>Author</label>
+        <input formControlName="author" />
+      </div>
+
+      <div>
+        <label>Category</label>
+        <input formControlName="category" />
+      </div>
+
+      <div>
+        <label>ISBN</label>
+        <input formControlName="isbn_number" />
+      </div>
+
+      <div>
+        <label>Total Copies</label>
+        <input type="number" formControlName="copies_total" />
+      </div>
+
+      <div>
+        <label>Available Copies</label>
+        <input type="number" formControlName="copies_available" />
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select formControlName="availability_status">
+          <option>Available</option>
+          <option>Issued</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+

@@ -1,0 +1,164 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Transport Management</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search transport..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Transport</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Route</th>
+          <th>Bus</th>
+          <th>Driver</th>
+          <th>Pickup</th>
+          <th>Drop</th>
+          <th>Fee</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let t of paginatedTransports">
+          <td>{{ t.id }}</td>
+          <td>{{ t.student_id }}</td>
+          <td>{{ t.route_number }}</td>
+          <td>{{ t.bus_number }}</td>
+          <td>{{ t.driver_name }}</td>
+          <td>{{ t.pickup_point }}</td>
+          <td>{{ t.drop_point }}</td>
+          <td>{{ t.transport_fee }}</td>
+          <td>
+            <span class="status"
+              [class.active]="t.transport_status === 'Active'">
+              {{ t.transport_status }}
+            </span>
+          </td>
+
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(t)">Edit</button>
+            <button class="btn danger" (click)="delete(t.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedTransports.length">
+          <td colspan="10" class="no-data">No transport records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+</div>
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Transport' : 'Add Transport' }}</h3>
+
+    <form [formGroup]="transportForm" class="school-form">
+
+      
+
+      <div>
+        <label>Student ID</label>
+        <input formControlName="student_id" />
+      </div>
+       <div>
+        <label>Student ID</label>
+        <input formControlName="branch_id" />
+      </div>
+      <div>
+        <label>Route Number</label>
+        <input formControlName="route_number" />
+      </div>
+
+      <div>
+        <label>Bus Number</label>
+        <input formControlName="bus_number" />
+      </div>
+
+      <div>
+        <label>Driver Name</label>
+        <input formControlName="driver_name" />
+      </div>
+
+      <div>
+        <label>Driver Contact</label>
+        <input formControlName="driver_contact" />
+      </div>
+
+      <div>
+        <label>Pickup Point</label>
+        <input formControlName="pickup_point" />
+      </div>
+
+      <div>
+        <label>Drop Point</label>
+        <input formControlName="drop_point" />
+      </div>
+
+      <div>
+        <label>Pickup Time</label>
+        <input type="time" formControlName="pickup_time" />
+      </div>
+
+      <div>
+        <label>Drop Time</label>
+        <input type="time" formControlName="drop_time" />
+      </div>
+
+      <div>
+        <label>Transport Fee</label>
+        <input type="number" formControlName="transport_fee" />
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select formControlName="transport_status">
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+

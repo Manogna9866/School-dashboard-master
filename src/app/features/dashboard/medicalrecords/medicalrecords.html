@@ -1,0 +1,138 @@
+<div class="card">
+
+  <div class="header">
+    <h2>Medical Records</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search medical records..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Medical</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Date</th>
+          <th>Issue</th>
+          <th>Severity</th>
+          <th>Hospital</th>
+          <th>Guardian</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let m of paginatedRecords">
+          <td>{{ m.id }}</td>
+          <td>{{ m.student_id }}</td>
+          <td>{{ m.medical_date }}</td>
+          <td>{{ m.medical_issues }}</td>
+          <td>{{ m.severity }}</td>
+          <td>{{ m.referred_to_hospital }}</td>
+          <td>{{ m.guardian_notified }}</td>
+
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(m)">Edit</button>
+            <button class="btn danger" (click)="delete(m.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedRecords.length">
+          <td colspan="8" class="no-data">No medical records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+
+</div>
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Medical Record' : 'Add Medical Record' }}</h3>
+
+    <form [formGroup]="medicalForm" class="school-form">
+
+      <input type="hidden" formControlName="school_id">
+      <input type="hidden" formControlName="branch_id">
+
+      <div>
+        <label>Student ID</label>
+        <input formControlName="student_id">
+      </div>
+
+      <div>
+        <label>Date</label>
+        <input type="date" formControlName="medical_date">
+      </div>
+
+      <div>
+        <label>Medical Issue</label>
+        <input formControlName="medical_issues">
+      </div>
+
+      <div>
+        <label>Severity</label>
+        <select formControlName="severity">
+          <option>Mild</option>
+          <option>Moderate</option>
+          <option>Severe</option>
+        </select>
+      </div>
+
+      <div>
+        <label>First Aid Given</label>
+        <input formControlName="first_aid_given">
+      </div>
+
+      <div>
+        <label>Referred to Hospital</label>
+        <select formControlName="referred_to_hospital">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Guardian Notified</label>
+        <select formControlName="guardian_notified">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+
