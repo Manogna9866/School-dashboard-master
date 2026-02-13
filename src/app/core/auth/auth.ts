@@ -337,7 +337,73 @@ export class AuthService {
   }
   deleteHostelAllocation(id: string) {
     return this.api.delete<any>(`hostel_allocations/${id}`);
-  }                     
+  } 
+  //facultyleave//
+  getFacultyLeaves() {
+    return this.api.get<any>('faculty_leave_management');
+  }
+  createFacultyLeave(payload: any) {
+    return this.api.post<any>('faculty_leave_management', payload);
+  }
+  updateFacultyLeave(id: string, payload: any) {
+    return this.api.put<any>(`faculty_leave_management/${id}`, payload);
+  }
+  deleteFacultyLeave(id: string) {
+    return this.api.delete<any>(`faculty_leave_management/${id}`);
+  } 
+  //faculty-salry/
+  getFacultySalaries() {
+    return this.api.get<any>('faculty_salary');
+  }
+  createFacultySalary(payload: any) {
+    return this.api.post<any>('faculty_salary', payload);
+  }
+  updateFacultySalary(id: string, payload: any) {
+    return this.api.put<any>(`faculty_salary/${id}`, payload);
+  }
+  deleteFacultySalary(id: string) {
+    return this.api.delete<any>(`faculty_salary/${id}`);
+  } 
+  //subjects//
+  getSubjects() {
+    return this.api.get<any>('subjects');
+  }
+  createsubject(payload: any) {
+    return this.api.post<any>('subjects', payload);
+  }
+  updatesubject(id: string, payload: any) {
+    return this.api.put<any>(`subjects/${id}`, payload);
+  }
+  deletesubject(id: string) {
+    return this.api.delete<any>(`subjects/${id}`);
+  } 
+  //gallery//
+  getGallery() {  
+    return this.api.get<any>('gallery');    
+  }
+  createGallery(payload: any) {
+    return this.api.post<any>('gallery', payload);
+  }
+  updateGallery(id: string, payload: any) {
+    return this.api.post<any>(`gallery/${id}`, payload);
+  }     
+    
+  deleteGallery(id: string) {
+    return this.api.delete<any>(`gallery/${id}`);
+  }
+  //school-calender//
+  getSchoolCalenders() {
+    return this.api.get<any>('school_calendar');
+  }
+  createSchoolCalender(payload: any) {
+    return this.api.post<any>('school_calendar', payload);
+  }
+  updateSchoolCalender(id: string, payload: any) {
+    return this.api.put<any>(`school_calendar/${id}`, payload);
+  }
+  deleteSchoolCalender(id: string) {
+    return this.api.delete<any>(`school_calendar/${id}`);
+  }
   // ✅ SAVE SESSION
   setSession(data: any) {
     // tokens

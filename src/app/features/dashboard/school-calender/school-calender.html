@@ -1,0 +1,160 @@
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>School Calendar</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search calendar..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Event</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Working Day</th>
+          <th>Visibility</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let c of paginatedCalendar">
+          <td>{{ c.id }}</td>
+          <td>{{ c.title }}</td>
+          <td>{{ c.calendar_type }}</td>
+          <td>{{ c.start_date }}</td>
+          <td>{{ c.end_date }}</td>
+          <td>{{ c.is_working_day }}</td>
+          <td>{{ c.visibility }}</td>
+
+          <td>
+            <span class="status" [class.active]="c.status === 'active'">
+              {{ c.status }}
+            </span>
+          </td>
+
+          <td class="actions-col">
+            <button class="btn outline" (click)="openEdit(c)">Edit</button>
+            <button class="btn danger" (click)="delete(c.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedCalendar.length">
+          <td colspan="9" class="no-data">No records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Event' : 'Add Event' }}</h3>
+
+    <form [formGroup]="calendarForm" class="school-form">
+
+      <div>
+        <label>Title</label>
+        <input formControlName="title" />
+      </div>
+      <div>
+        <label>School ID</label>
+        <input formControlName="school_id" />
+      </div>
+      <div>
+        <label>Branch ID</label>
+        <input formControlName="branch_id" />
+      </div>
+
+      <div>
+        <label>Calendar Type</label>
+        <select formControlName="calendar_type">
+          <option value="">Select</option>
+          <option>Holiday</option>
+          <option>Exam</option>
+          <option>Event</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Start Date</label>
+        <input type="date" formControlName="start_date" />
+      </div>
+
+      <div>
+        <label>End Date</label>
+        <input type="date" formControlName="end_date" />
+      </div>
+
+      <div>
+        <label>Working Day</label>
+        <select formControlName="is_working_day">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Visibility</label>
+        <select formControlName="visibility">
+          <option>All</option>
+          <option>Students</option>
+          <option>Staff</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Description</label>
+        <textarea formControlName="description"></textarea>
+      </div>
+
+      <div class="full">
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+

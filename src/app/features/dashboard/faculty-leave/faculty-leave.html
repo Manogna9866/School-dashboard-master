@@ -1,0 +1,154 @@
+<div class="card">
+
+  <div class="header">
+    <h2>Faculty Leave</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search leave..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Apply Leave</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>School ID</th>
+          <th>Branch ID</th>
+          <th>Faculty ID</th>
+          <th>Leave Type</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Status</th>
+          <th width="150">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let l of paginatedLeaves">
+          <td>{{ l.id }}</td>
+          <td>{{ l.school_id }}</td>
+          <td>{{ l.branch_id }}</td>
+          <td>{{ l.faculty_id }}</td>
+          <td>{{ l.leave_type }}</td>
+          <td>{{ l.from_date }}</td>
+          <td>{{ l.to_date }}</td>
+          <td>{{ l.approval_status }}</td>
+
+          <td>
+            <button class="btn outline" (click)="openEdit(l)">Edit</button>
+            <button class="btn danger" (click)="delete(l.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedLeaves.length">
+          <td colspan="9" class="no-data">No leave records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Leave' : 'Apply Leave' }}</h3>
+
+    <form [formGroup]="leaveForm" class="school-form">
+
+      <div>
+        <label>School ID</label>
+        <input formControlName="school_id" />
+      </div>
+
+      <div>
+        <label>Branch ID</label>
+        <input formControlName="branch_id" />
+      </div>
+
+      <div>
+        <label>Faculty ID</label>
+        <input formControlName="faculty_id" />
+      </div>
+
+      <div>
+        <label>Leave Type</label>
+        <select formControlName="leave_type">
+          <option>Casual</option>
+          <option>Medical</option>
+          <option>Earned</option>
+        </select>
+      </div>
+
+      <div>
+        <label>From Date</label>
+        <input type="date" formControlName="from_date" />
+      </div>
+
+      <div>
+        <label>To Date</label>
+        <input type="date" formControlName="to_date" />
+      </div>
+
+      <div class="full">
+        <label>Reason</label>
+        <textarea formControlName="reason"></textarea>
+      </div>
+
+      <div>
+        <label>Approval Status</label>
+        <select formControlName="approval_status">
+          <option>Pending</option>
+          <option>Approved</option>
+          <option>Rejected</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Approved By</label>
+        <input formControlName="approved_by" />
+      </div>
+
+      <div>
+        <label>Last Accessed By</label>
+        <input formControlName="last_accessed_by" />
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>

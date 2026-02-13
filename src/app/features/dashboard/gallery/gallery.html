@@ -1,0 +1,114 @@
+<div class="card">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>Gallery</h2>
+
+        <div class="header-actions">
+            <input class="search-input" type="text" placeholder="Search gallery..." [(ngModel)]="searchText"
+                (input)="applyFilter()" />
+
+            <button class="btn primary" (click)="openAdd()">+ Add Gallery</button>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Event</th>
+                    <th>Title</th>
+                    <th>Image</th>
+                    <th>Uploaded Date</th>
+                    <th>Status</th>
+                    <th width="140">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr *ngFor="let g of paginatedGallery">
+                    <td>{{ g.id }}</td>
+                    <td>{{ g.event_name }}</td>
+                    <td>{{ g.image_title }}</td>
+                    <td>
+                        <img *ngIf="g.attachment"
+                            [src]="'https://s2swebsolutions.in/S2SWebSchool/public/' + g.attachment" width="60"
+                            height="50" style="border-radius: 5px;" alt="{{g.attachment_type}}"
+                            title="{{g.attachment}}" />
+                    </td>
+
+                    <td>{{ g.uploaded_date }}</td>
+
+                    <td>
+                        <span class="status" [class.active]="g.status === 'active'">
+                            {{ g.status }}
+                        </span>
+                    </td>
+
+                    <td class="actions-col">
+                        <button class="btn outline" (click)="openEdit(g)">Edit</button>
+                        <button class="btn danger" (click)="delete(g.id)">Delete</button>
+                    </td>
+                </tr>
+
+                <tr *ngIf="!paginatedGallery.length">
+                    <td colspan="7" class="no-data">No gallery records found</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+        <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
+
+        <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+        <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
+            (click)="changePage(currentPage + 1)">Next</button>
+    </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+    <div class="modal-content">
+
+        <h3>{{ editId ? 'Edit Gallery' : 'Add Gallery' }}</h3>
+
+        <form [formGroup]="galleryForm" class="school-form">
+
+            <div>
+                <label>Event Name</label>
+                <input formControlName="event_name" />
+            </div>
+
+            <div>
+                <label>Image Title</label>
+                <input formControlName="image_title" />
+            </div>
+
+            <div>
+                <label>Upload Image</label>
+                <input type="file" (change)="onFileChange($event)" />
+            </div>
+
+            <div>
+                <label>Status</label>
+                <select formControlName="status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+        </form>
+
+        <div class="actions">
+            <button class="btn outline" (click)="showModal=false">Cancel</button>
+            <button class="btn primary" (click)="save()">Save</button>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,131 @@
+
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Faculty Salary</h2>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search salary..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()" />
+
+      <button class="btn primary" (click)="openAdd()">+ Add Salary</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Faculty ID</th>
+          <th>Month</th>
+          <th>Basic</th>
+          <th>Allowances</th>
+          <th>Deductions</th>
+          <th>Net</th>
+          <th>Status</th>
+          <th width="150">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let s of paginatedSalary">
+          <td>{{ s.id }}</td>
+          <td>{{ s.faculty_id }}</td>
+          <td>{{ s.salary_month }}</td>
+          <td>{{ s.basic_salary }}</td>
+          <td>{{ s.allowances }}</td>
+          <td>{{ s.deductions }}</td>
+          <td>{{ s.net_salary }}</td>
+          <td>{{ s.payment_status }}</td>
+
+          <td>
+            <button class="btn outline" (click)="openEdit(s)">Edit</button>
+            <button class="btn danger" (click)="delete(s.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedSalary.length">
+          <td colspan="9" class="no-data">No salary records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button class="btn outline"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">Prev</button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button class="btn outline"
+      [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">Next</button>
+  </div>
+
+</div>
+<!-- MODAL -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>{{ editId ? 'Edit Salary' : 'Add Salary' }}</h3>
+
+    <form [formGroup]="salaryForm" class="school-form">
+
+      <div><label>School ID</label><input formControlName="school_id" /></div>
+      <div><label>Branch ID</label><input formControlName="branch_id" /></div>
+      <div><label>Faculty ID</label><input formControlName="faculty_id" /></div>
+
+      <div><label>Salary Month</label><input formControlName="salary_month" /></div>
+      <div><label>Salary Type</label><input formControlName="salary_type" /></div>
+
+      <div><label>Basic Salary</label><input formControlName="basic_salary" /></div>
+      <div><label>Allowances</label><input formControlName="allowances" /></div>
+      <div><label>Deductions</label><input formControlName="deductions" /></div>
+      <div><label>Net Salary</label><input formControlName="net_salary" /></div>
+
+      <div><label>Payment Date</label><input type="date" formControlName="payment_date" /></div>
+      <div><label>Payment Method</label><input formControlName="payment_method" /></div>
+
+      <div>
+        <label>Payment Status</label>
+        <select formControlName="payment_status">
+          <option>Paid</option>
+          <option>Pending</option>
+        </select>
+      </div>
+
+      <div><label>Processed By</label><input formControlName="processed_by" /></div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea formControlName="remarks"></textarea>
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      
+
+    </form>
+
+    <div class="actions">
+      <button class="btn outline" (click)="showModal=false">Cancel</button>
+      <button class="btn primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>

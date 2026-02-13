@@ -20,11 +20,16 @@ import { TransportManagement } from "./transport-management/transport-management
 import { Medicalrecords } from "./medicalrecords/medicalrecords";
 import { LibraryBookIssue } from "./library-book-issue/library-book-issue";
 import { HostelAllocation } from "./hostel-allocation/hostel-allocation";
+import { FacultyLeave } from "./faculty-leave/faculty-leave";
+import { FacultySalary } from "./faculty-salary/faculty-salary";
+import { Subjects } from "./subjects/subjects";
+import { Gallery } from "./gallery/gallery";
+import { SchoolCalender } from "./school-calender/school-calender";
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation],
+  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation, Faculty, FacultyLeave, FacultySalary, Subjects, Gallery, SchoolCalender],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
