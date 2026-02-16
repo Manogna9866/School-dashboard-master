@@ -47,6 +47,12 @@
                             {{ school.status }}
                         </span>
                     </td>
+                     <td>
+                        <img *ngIf="school.logo"
+                            [src]="'https://s2swebsolutions.in/S2SWebSchool/public/' + school.logo" width="60"
+                            height="50" style="border-radius: 5px;" 
+                            title="{{school.logo}}" />
+                    </td>
                     <td class="actions-col">
                         <button class="btn outline" (click)="openEdit(school)">Edit</button>
                         <button class="btn danger" (click)="delete(school.id)">Delete</button>

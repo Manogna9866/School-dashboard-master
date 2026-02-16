@@ -5,11 +5,7 @@
     <h2>Progress Cards</h2>
 
     <div class="header-actions">
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search progress cards..."
-        [(ngModel)]="searchText"
+      <input class="search-input" type="text" placeholder="Search progress cards..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Progress Card</button>
@@ -27,6 +23,9 @@
           <th>Class</th>
           <th>%</th>
           <th>Grade</th>
+          <th>Teacher Signature</th>
+          <th>Principal Signature</th>
+
           <th>Status</th>
           <th width="140">Actions</th>
         </tr>
@@ -40,6 +39,16 @@
           <td>{{ p.class_id }}</td>
           <td>{{ p.percentage }}%</td>
           <td>{{ p.grade }}</td>
+          <td>
+            <img *ngIf="p.teacher_signature"
+              [src]="'https://s2swebsolutions.in/S2SWebSchool/public/' + p.teacher_signature" width="60" height="50"
+              style="border-radius: 5px;" title="{{p.attachment}}" />
+          </td>
+          <td>
+            <img *ngIf="p.principal_signature"
+              [src]="'https://s2swebsolutions.in/S2SWebSchool/public/' + p.principal_signature" width="60" height="50"
+              style="border-radius: 5px;" title="{{p.principal_signature}}" />
+          </td>
           <td>
             <span class="status" [class.active]="p.result_status === 'Pass'">
               {{ p.result_status }}
@@ -60,16 +69,13 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
       Prev
     </button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">
       Next
     </button>
@@ -84,20 +90,45 @@
     <h3>{{ editId ? 'Edit Progress Card' : 'Add Progress Card' }}</h3>
 
     <form [formGroup]="progressCardForm" class="school-form">
-
       <div>
-        <label>Exam ID</label>
-        <input formControlName="exam_id" />
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">{{ s.school_name }}</option>
+        </select>
       </div>
 
       <div>
-        <label>Student ID</label>
-        <input formControlName="student_id" />
+        <label>Branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of branches" [value]="b.id">{{ b.branch_name }}</option>
+        </select>
       </div>
-
       <div>
-        <label>Class ID</label>
-        <input formControlName="class_id" />
+        <label>Student</label>
+        <select formControlName="student_id">
+          <option value="">Select Student</option>
+          <option *ngFor="let s of students" [value]="s.id">{{ s.first_name }} {{ s.last_name }}</option>
+        </select>
+      </div>
+      <div>
+        <label>Class</label>
+        <select formControlName="class_id">
+          <option value="">Select Class</option>
+          <option *ngFor="let c of classes" [value]="c.id">{{ c.class_name }}</option>
+        </select>
+      </div>
+      <div>
+        <label>Exam</label>
+        <select formControlName="exam_id">
+          <option value="">Select exam</option>
+          <option *ngFor="let c of exams" [value]="c.id">{{ c.exam_name }}</option>
+        </select>
+      </div>
+      <div>
+        <label>Percentage</label>
+        <input formControlName="percentage" />
       </div>
 
       <div>
@@ -138,6 +169,19 @@
         <label>Overall Remarks</label>
         <textarea formControlName="overall_remarks"></textarea>
       </div>
+      <div>
+        <label>Teacher Signature</label>
+        <input type="file" (change)="onFileChange($event, 'teacher')" />
+        <img *ngIf="progressCardForm.value.teacher_signature" [src]="progressCardForm.value.teacher_signature"
+          class="signature-preview" />
+      </div>
+
+      <div>
+        <label>Principal Signature</label>
+        <input type="file" (change)="onFileChange($event, 'principal')" />
+        <img *ngIf="progressCardForm.value.principal_signature" [src]="progressCardForm.value.principal_signature"
+          class="signature-preview" />
+      </div>
 
     </form>
 
@@ -148,4 +192,3 @@
 
   </div>
 </div>
-

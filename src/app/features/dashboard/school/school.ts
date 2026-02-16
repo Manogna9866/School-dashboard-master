@@ -154,7 +154,6 @@ export class School {
 
   /* ---------------- SAVE ---------------- */
   save() {
-
     if (this.schoolForm.invalid) {
       this.notify.error('All required fields must be filled');
       return;
@@ -162,9 +161,12 @@ export class School {
 
     const formData = new FormData();
 
-    // Append all form values
+    // Append all form values safely
     Object.keys(this.schoolForm.value).forEach(key => {
-      formData.append(key, this.schoolForm.value[key]);
+      const value = this.schoolForm.value[key];
+      if (value !== null && value !== undefined) {
+        formData.append(key, value.toString());
+      }
     });
 
     // Append logo file if selected
@@ -172,38 +174,40 @@ export class School {
       formData.append('logo', this.selectedLogoFile);
     }
 
-    // 👇 IMPORTANT FOR LARAVEL UPDATE
+    // Laravel PUT workaround
     if (this.editId) {
       formData.append('_method', 'PUT');
     }
 
-    // Same clean request structure like gallery
+    // Use correct service method
     const request$ = this.editId
       ? this.schoolsService.updateSchool(this.editId, formData)
       : this.schoolsService.createSchool(formData);
 
+    this.loading = true;
     request$.subscribe({
       next: (res: any) => {
+        this.loading = false;
         if (res.success) {
           this.notify.success(
             this.editId ? 'School updated successfully' : 'School created successfully'
           );
-
-          this.showModal = false;
-          this.searchText = '';
-          this.selectedLogoFile = undefined as any;
-          this.loadSchools();
-          this.schoolForm.reset();
+          this.afterSaveSuccess();
         } else {
           this.notify.error(res.message || 'Operation failed');
         }
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
+        this.loading = false;
         this.notify.error('Server error');
       }
     });
   }
+
+  /* Use the helper afterSaveSuccess */
+ 
+
 
 
   /* ---------- COMMON SUCCESS HANDLER ---------- */

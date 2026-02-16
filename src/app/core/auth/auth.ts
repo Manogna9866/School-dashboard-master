@@ -76,7 +76,7 @@ export class AuthService {
 
   // UPDATE a school
   updateSchool(id: string, payload: any) {
-    return this.api.put<any>(`schools/${id}`, payload);
+    return this.api.post<any>(`schools/${id}`, payload);
   }
 
   // DELETE a school
@@ -415,6 +415,19 @@ export class AuthService {
   deleteModules(id: string) {
     return this.api.delete<any>(`modules/${id}`);
    }
+  //exams//
+  getExams() {
+    return this.api.get<any>('exam');
+  }
+  createExam(payload: any) {
+    return this.api.post<any>('exam', payload);
+  }
+  updateExam(id: string, payload: any) {
+    return this.api.put<any>(`exam/${id}`, payload);
+  }
+  deleteExam(id: string) {
+    return this.api.delete<any>(`exam/${id}`);
+  }
   // ✅ SAVE SESSION
   setSession(data: any) {
     // tokens

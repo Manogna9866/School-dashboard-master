@@ -12,10 +12,13 @@ import { NotifyService } from '../../../core/services/notify';
   styleUrl: './examscrores.scss',
 })
 export class Examscrores {
-  examScores: any[] = [];
+ examScores: any[] = [];
   filteredExamScores: any[] = [];
   paginatedExamScores: any[] = [];
-
+  schools: any[] = [];
+  branches: any[] = [];
+  exams: any[] = [];
+  students: any[] = [];
   pages: number[] = [];
   currentPage = 1;
   pageSize = 5;
@@ -33,8 +36,8 @@ export class Examscrores {
 
   ngOnInit() {
     this.examScoreForm = this.fb.group({
-      school_id: ['1', Validators.required],
-      branch_id: ['1', Validators.required],
+      school_id: ['', Validators.required],
+      branch_id: ['', Validators.required],
       exam_id: ['', Validators.required],
       student_id: ['', Validators.required],
       marks_obtained: ['', Validators.required],
@@ -43,54 +46,118 @@ export class Examscrores {
       remarks: [''],
     });
 
+    // Load master data
+    this.loadSchools();
     this.loadExamScores();
-  }
 
-  /* ================= LOAD ================= */
-  loadExamScores() {
-    this.loading = true;
+    // ================= Cascading Selects =================
+    // School → Branch + Students
+    this.examScoreForm.get('school_id')?.valueChanges.subscribe((schoolId) => {
+      if (schoolId) {
+        this.loadBranchesBySchool(schoolId);
+        this.loadStudentsBySchool(schoolId); // 🔥 Load students by school
+        this.examScoreForm.patchValue({ branch_id: '', exam_id: '', student_id: '' }, { emitEvent: false });
+        this.exams = [];
+      } else {
+        this.branches = [];
+        this.students = [];
+        this.exams = [];
+      }
+    });
 
-    this.service.getexamscrores().subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.examScores = Array.isArray(res.data?.data)
-            ? res.data.data
-            : [];
-          this.applyFilter();
-        } else {
-          this.notify.error('Failed to load exam scores');
-        }
-        this.loading = false;
-      },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
+    // Branch → Exams
+    this.examScoreForm.get('branch_id')?.valueChanges.subscribe((branchId) => {
+      if (branchId) {
+        this.loadExamsByBranch(branchId);
+        this.examScoreForm.patchValue({ exam_id: '' }, { emitEvent: false });
+      } else {
+        this.exams = [];
       }
     });
   }
 
-  /* ================= SEARCH ================= */
+  /* ================= LOAD MASTER ================= */
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => {
+        this.schools = res?.success ? res.data?.data || [] : [];
+      },
+      error: () => this.notify.error('Failed to load schools')
+    });
+  }
+
+  loadBranchesBySchool(schoolId: string) {
+    this.service.getBranches().subscribe({
+      next: (res: any) => {
+        this.branches = (res.data?.data || []).filter((b: any) => Number(b.school_id) === Number(schoolId));
+      },
+      error: () => {
+        this.branches = [];
+        this.notify.error('Failed to load branches');
+      }
+    });
+  }
+
+  loadExamsByBranch(branchId: string) {
+    this.service.getExams().subscribe({
+      next: (res: any) => {
+        this.exams = (res.data?.data || []).filter((e: any) => Number(e.branch_id) === Number(branchId));
+      },
+      error: () => {
+        this.exams = [];
+        this.notify.error('Failed to load exams');
+      }
+    });
+  }
+
+  // ================= 🔥 Load Students by School =================
+  loadStudentsBySchool(schoolId: string) {
+    if (!schoolId) {
+      this.students = [];
+      return;
+    }
+    const sId = Number(schoolId);
+
+    this.service.getstudents().subscribe({
+      next: (res: any) => {
+        const allStudents = res?.success ? res.data?.data || [] : [];
+        this.students = allStudents.filter((s: any) => Number(s.school_id) === sId);
+      },
+      error: () => {
+        this.students = [];
+        this.notify.error('Failed to load students');
+      }
+    });
+  }
+
+  /* ================= EXAM SCORES ================= */
+  loadExamScores() {
+    this.service.getexamscrores().subscribe({
+      next: (res: any) => {
+        this.examScores = res?.success ? res.data?.data || [] : [];
+        this.applyFilter();
+      },
+      error: () => this.notify.error('Server error')
+    });
+  }
+
+  /* ================= SEARCH & PAGINATION ================= */
   applyFilter() {
     const text = this.searchText.toLowerCase();
-
     this.filteredExamScores = this.examScores.filter(s =>
       (s.student_id || '').toString().includes(text) ||
       (s.exam_id || '').toString().includes(text) ||
       (s.grade || '').toLowerCase().includes(text) ||
       (s.result_status || '').toLowerCase().includes(text)
     );
-
     this.currentPage = 1;
     this.updatePagination();
   }
 
-  /* ================= PAGINATION ================= */
   updatePagination() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
-
     this.paginatedExamScores = this.filteredExamScores.slice(start, end);
-
     const totalPages = Math.ceil(this.filteredExamScores.length / this.pageSize);
     this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
   }
@@ -104,20 +171,21 @@ export class Examscrores {
   /* ================= MODAL ================= */
   openAdd() {
     this.editId = null;
-    this.examScoreForm.reset({
-      school_id: '1',
-      branch_id: '1'
-    });
+    this.examScoreForm.reset();
     this.showModal = true;
   }
 
   openEdit(score: any) {
     this.editId = score.id;
-    this.examScoreForm.patchValue(score);
     this.showModal = true;
+    this.examScoreForm.patchValue(score);
+
+    // Load branches and students for edit
+    this.loadBranchesBySchool(score.school_id);
+    this.loadStudentsBySchool(score.school_id);
+    this.loadExamsByBranch(score.branch_id);
   }
 
-  /* ================= SAVE ================= */
   save() {
     if (this.examScoreForm.invalid) {
       this.notify.error('All required fields are required');
@@ -125,39 +193,32 @@ export class Examscrores {
     }
 
     this.loading = true;
+    const payload = this.examScoreForm.value;
 
     const request$ = this.editId
-      ? this.service.updateexamscrore(this.editId, this.examScoreForm.value)
-      : this.service.createexamscrore(this.examScoreForm.value);
+      ? this.service.updateexamscrore(this.editId, payload)
+      : this.service.createexamscrore(payload);
 
     request$.subscribe({
       next: (res: any) => {
         if (res.success) {
           this.notify.success(res.message || 'Exam score saved successfully');
           this.showModal = false;
-          this.examScoreForm.reset({
-            school_id: '1',
-            branch_id: '1'
-          });
           this.loadExamScores();
         } else {
           this.notify.error(res.message || 'Operation failed');
         }
         this.loading = false;
       },
-      error: (err: any) => {
+      error: (err) => {
         this.notify.error(err.error?.message || 'Server error');
         this.loading = false;
       }
     });
   }
 
-
-  /* ================= DELETE ================= */
   delete(id: string) {
     if (!confirm('Delete this exam score?')) return;
-
-    this.loading = true;
     this.service.deleteexamscrore(id).subscribe({
       next: (res: any) => {
         if (res.success) {
@@ -166,13 +227,8 @@ export class Examscrores {
         } else {
           this.notify.error('Delete failed');
         }
-        this.loading = false;
       },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+      error: () => this.notify.error('Server error')
     });
   }
-
 }

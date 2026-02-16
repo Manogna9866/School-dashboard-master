@@ -26,11 +26,12 @@ import { Subjects } from "./subjects/subjects";
 import { Gallery } from "./gallery/gallery";
 import { SchoolCalender } from "./school-calender/school-calender";
 import { Modules } from "./modules/modules";
+import { Exam } from "./exam/exam";
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation, Faculty, FacultyLeave, FacultySalary, Subjects, Gallery, SchoolCalender, Modules, School, Branches, Classes, Students, Timetable, Attendence],
+  imports: [Examscrores, ProgressCards],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
