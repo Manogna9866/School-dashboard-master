@@ -25,11 +25,12 @@ import { FacultySalary } from "./faculty-salary/faculty-salary";
 import { Subjects } from "./subjects/subjects";
 import { Gallery } from "./gallery/gallery";
 import { SchoolCalender } from "./school-calender/school-calender";
+import { Modules } from "./modules/modules";
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation, Faculty, FacultyLeave, FacultySalary, Subjects, Gallery, SchoolCalender],
+  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation, Faculty, FacultyLeave, FacultySalary, Subjects, Gallery, SchoolCalender, Modules, School],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

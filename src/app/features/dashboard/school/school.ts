@@ -114,22 +114,21 @@ export class School {
   openEdit(school: any) {
     this.editId = school.id;
 
-    this.schoolForm = this.fb.group({
-      school_name: ['', Validators.required],
-      school_code: ['', Validators.required],
-      address: ['', Validators.required],
-      type: ['', Validators.required],
-      management: ['', Validators.required],
-      chairman_name: ['', Validators.required],
-      contact_number: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      total_students: ['', Validators.required],
-      total_teachers: ['', Validators.required],
-      established_year: ['', Validators.required],
-      status: ['active', Validators.required],
-      logo: ['']
+    // DO NOT recreate form
+    this.schoolForm.patchValue({
+      school_name: school.school_name,
+      school_code: school.school_code,
+      address: school.address,
+      type: school.type,
+      management: school.management,
+      chairman_name: school.chairman_name,
+      contact_number: school.contact_number,
+      email: school.email,
+      total_students: school.total_students,
+      total_teachers: school.total_teachers,
+      established_year: school.established_year,
+      status: school.status
     });
-
 
     this.logoPreview = school.logo
       ? this.apiBaseUrl + '/' + school.logo
@@ -138,6 +137,7 @@ export class School {
     this.selectedLogoFile = null;
     this.showModal = true;
   }
+
 
 
   onLogoChange(event: any) {
@@ -154,84 +154,57 @@ export class School {
 
   /* ---------------- SAVE ---------------- */
   save() {
-    console.log('SAVE triggered');
 
     if (this.schoolForm.invalid) {
-      console.warn('Form is invalid', this.schoolForm.value);
-      this.notify.error('All fields are required');
+      this.notify.error('All required fields must be filled');
       return;
     }
 
-    this.loading = true;
-    console.log('Form is valid, starting save process');
-
     const formData = new FormData();
 
+    // Append all form values
     Object.keys(this.schoolForm.value).forEach(key => {
-      if (key !== 'logo') {
-        const value = this.schoolForm.value[key];
-        console.log(`Appending field: ${key}`, value);
-        formData.append(key, value);
-      }
+      formData.append(key, this.schoolForm.value[key]);
     });
 
+    // Append logo file if selected
     if (this.selectedLogoFile) {
-      console.log('Appending logo file', this.selectedLogoFile);
       formData.append('logo', this.selectedLogoFile);
-    } else {
-      console.log('No logo file selected');
     }
 
-    // ---------- CREATE / UPDATE ----------
+    // 👇 IMPORTANT FOR LARAVEL UPDATE
     if (this.editId) {
-      console.log('UPDATE flow started. ID:', this.editId);
-
-      this.schoolsService.updateSchool(this.editId, formData).subscribe({
-        next: (res) => {
-          console.log('Update response:', res);
-
-          if (res?.success) {
-            this.notify.success(res.message || 'School updated successfully');
-            this.afterSaveSuccess();
-          } else {
-            console.error('Update failed:', res);
-            this.notify.error(res.message || 'Update failed');
-          }
-
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Update API error:', error);
-          this.notify.error('Server error');
-          this.loading = false;
-        }
-      });
-
-    } else {
-      console.log('CREATE flow started');
-
-      this.schoolsService.createSchool(formData).subscribe({
-        next: (res) => {
-          console.log('Create response:', res);
-
-          if (res?.success) {
-            this.notify.success(res.message || 'School created successfully');
-            this.afterSaveSuccess();
-          } else {
-            console.error('Create failed:', res);
-            this.notify.error(res.message || 'Create failed');
-          }
-
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Create API error:', error);
-          this.notify.error('Server error');
-          this.loading = false;
-        }
-      });
+      formData.append('_method', 'PUT');
     }
+
+    // Same clean request structure like gallery
+    const request$ = this.editId
+      ? this.schoolsService.updateSchool(this.editId, formData)
+      : this.schoolsService.createSchool(formData);
+
+    request$.subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.notify.success(
+            this.editId ? 'School updated successfully' : 'School created successfully'
+          );
+
+          this.showModal = false;
+          this.searchText = '';
+          this.selectedLogoFile = undefined as any;
+          this.loadSchools();
+          this.schoolForm.reset();
+        } else {
+          this.notify.error(res.message || 'Operation failed');
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        this.notify.error('Server error');
+      }
+    });
   }
+
 
   /* ---------- COMMON SUCCESS HANDLER ---------- */
   private afterSaveSuccess() {

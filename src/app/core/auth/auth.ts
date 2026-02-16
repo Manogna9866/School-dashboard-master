@@ -71,13 +71,11 @@ export class AuthService {
 
   // CREATE a school
   createSchool(payload: any) {
-    console.log('API URL:', this.api);
     return this.api.post<any>('schools', payload);
   }
 
   // UPDATE a school
   updateSchool(id: string, payload: any) {
-    console.log('API URL:', this.api);
     return this.api.put<any>(`schools/${id}`, payload);
   }
 
@@ -404,6 +402,19 @@ export class AuthService {
   deleteSchoolCalender(id: string) {
     return this.api.delete<any>(`school_calendar/${id}`);
   }
+  //modules//
+ getModules() {
+    return this.api.get<any>('modules');
+  }
+  createModules(payload: any) {
+    return this.api.post<any>('modules', payload);
+  }
+  updateModules(id: string, payload: any) {
+    return this.api.put<any>(`modules/${id}`, payload);
+  }
+  deleteModules(id: string) {
+    return this.api.delete<any>(`modules/${id}`);
+   }
   // ✅ SAVE SESSION
   setSession(data: any) {
     // tokens

@@ -32,10 +32,10 @@
             <tbody>
                 <tr *ngFor="let school of paginatedSchools">
                     <td>{{ school.id }}</td>
-                    <td>
-                        <img *ngIf="school.logo" [src]="apiBaseUrl + '/' + school.logo" class="school-logo"
-                            alt="logo" />
-                    </td>
+                    <td><img *ngIf="school.attachment"
+                            [src]="'https://s2swebsolutions.in/S2SWebSchool/public/' + school.logo" width="60"
+                            height="50" style="border-radius: 5px;" title="{{school.logo}}" /></td>
+
                     <td>{{ school.school_name }}</td>
                     <td>{{ school.school_code }}</td>
                     <td>{{ school.management }}</td>

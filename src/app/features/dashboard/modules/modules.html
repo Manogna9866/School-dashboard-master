@@ -1,0 +1,121 @@
+<div class="card-container">
+
+  <!-- HEADER -->
+  <div class="card-header">
+    <div class="left">
+      <h2>Modules</h2>
+      <span class="badge">{{ modules.length }} Total</span>
+    </div>
+
+    <div class="right">
+      <input
+        type="text"
+        placeholder="Search module..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()"
+        class="search-box"
+      />
+
+      <button class="btn-primary" (click)="openAdd()">
+        + Add Module
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Module Key</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th width="140">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let m of paginatedModules">
+          <td>{{ m.id }}</td>
+          <td>{{ m.module_key }}</td>
+          <td>{{ m.module_name }}</td>
+
+          <td>
+            <span
+              class="status"
+              [class.active]="m.status === 'active'"
+              [class.inactive]="m.status === 'inactive'"
+            >
+              {{ m.status }}
+            </span>
+          </td>
+
+          <td class="actions">
+            <button class="btn-edit" (click)="openEdit(m)">Edit</button>
+            <button class="btn-delete" (click)="delete(m.id)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!paginatedModules.length">
+          <td colspan="5" class="no-data">No modules found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <button (click)="changePage(currentPage - 1)"
+            [disabled]="currentPage === 1">
+      Prev
+    </button>
+
+    <span>Page {{ currentPage }} of {{ pages.length }}</span>
+
+    <button (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage === pages.length">
+      Next
+    </button>
+  </div>
+</div>
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-box">
+
+    <h3>{{ editId ? 'Edit Module' : 'Add Module' }}</h3>
+
+    <form [formGroup]="moduleForm" class="form-grid">
+
+      <div>
+        <label>Module Key</label>
+        <input formControlName="module_key" />
+      </div>
+
+      <div>
+        <label>Module Name</label>
+        <input formControlName="module_name" />
+      </div>
+
+      <div class="full">
+        <label>Description</label>
+        <textarea formControlName="description"></textarea>
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+    </form>
+
+    <div class="modal-actions">
+      <button (click)="showModal=false">Cancel</button>
+      <button class="btn-primary" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
+
