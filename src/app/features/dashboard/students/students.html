@@ -5,11 +5,7 @@
     <h2>Students</h2>
 
     <div class="header-actions">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search students..."
-        [(ngModel)]="searchText"
+      <input type="text" class="search-input" placeholder="Search students..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Student</button>
@@ -41,6 +37,11 @@
           <td>{{ s.phone_number }}</td>
           <td>{{ s.email }}</td>
           <td>
+            <img *ngIf="s.profile_photo" [src]="'https://s2swebsolutions.in/S2SWebSchool/public/' + s.profile_photo"
+              width="60" height="50" style="border-radius: 5px;" alt="{{s.profile_photo}}"
+              title="{{s.profile_photo}}" />
+          </td>
+          <td>
             <span class="status" [class.active]="s.status === 'Active'">
               {{ s.status }}
             </span>
@@ -60,16 +61,13 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
       Prev
     </button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">
       Next
     </button>
@@ -84,7 +82,24 @@
     <h3>{{ editId ? 'Edit Student' : 'Add Student' }}</h3>
 
     <form [formGroup]="studentForm" class="school-form">
-
+      <div>
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">
+            {{ s.school_name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label>branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select branch</option>
+          <option *ngFor="let s of branches" [value]="s.id">
+            {{ s.branch_name }}
+          </option>
+        </select>
+      </div>
       <div>
         <label>First Name</label>
         <input formControlName="first_name" />
@@ -138,7 +153,10 @@
         <label>Admission Date</label>
         <input type="date" formControlName="admission_date" />
       </div>
-
+           <div>
+                <label>Upload Image</label>
+                <input type="file" (change)="onFileChange($event)" />
+            </div>
       <div class="full">
         <label>Status</label>
         <select formControlName="status">
@@ -146,7 +164,7 @@
           <option value="Inactive">Inactive</option>
         </select>
       </div>
-
+         
     </form>
 
     <div class="actions">

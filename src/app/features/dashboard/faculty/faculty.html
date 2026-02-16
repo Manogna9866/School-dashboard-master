@@ -5,11 +5,7 @@
     <h2>Faculty</h2>
 
     <div class="header-actions">
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search faculty..."
-        [(ngModel)]="searchText"
+      <input class="search-input" type="text" placeholder="Search faculty..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Faculty</button>
@@ -60,13 +56,11 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline" [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">Prev</button>
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">Next</button>
   </div>
 
@@ -79,7 +73,25 @@
     <h3>{{ editId ? 'Edit Faculty' : 'Add Faculty' }}</h3>
 
     <form [formGroup]="facultyForm" class="school-form">
-
+      
+      <div>
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">
+            {{ s.school_name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label>Branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select branch</option>
+          <option *ngFor="let s of branches" [value]="s.id">
+            {{ s.branch_name }}
+          </option>
+        </select>
+      </div>
       <div>
         <label>First Name</label>
         <input formControlName="first_name" />
@@ -136,4 +148,3 @@
 
   </div>
 </div>
-

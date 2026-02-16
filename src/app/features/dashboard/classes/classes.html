@@ -6,10 +6,7 @@
   <div class="toolbar">
     <div class="search-box">
       <span>🔍</span>
-      <input
-        type="text"
-        placeholder="Search class, section, subject..."
-        [(ngModel)]="searchText"
+      <input type="text" placeholder="Search class, section, subject..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
     </div>
 
@@ -57,22 +54,13 @@
 
     <!-- PAGINATION -->
     <div class="pagination" *ngIf="pages.length > 1">
-      <button
-        class="nav"
-        [disabled]="currentPage === 1"
-        (click)="changePage(currentPage - 1)">‹</button>
+      <button class="nav" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">‹</button>
 
-      <button
-        *ngFor="let p of pages"
-        [class.active]="currentPage === p"
-        (click)="changePage(p)">
+      <button *ngFor="let p of pages" [class.active]="currentPage === p" (click)="changePage(p)">
         {{ p }}
       </button>
 
-      <button
-        class="nav"
-        [disabled]="currentPage === pages.length"
-        (click)="changePage(currentPage + 1)">›</button>
+      <button class="nav" [disabled]="currentPage === pages.length" (click)="changePage(currentPage + 1)">›</button>
     </div>
   </div>
 
@@ -82,9 +70,36 @@
       <h3>{{ editId ? 'Edit Class' : 'Add Class' }}</h3>
 
       <form [formGroup]="classForm" (ngSubmit)="save()">
+        <div>
+          <label>School</label>
+          <select formControlName="school_id">
+            <option value="">Select School</option>
+            <option *ngFor="let s of schools" [value]="s.id">
+              {{ s.school_name }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label>branch</label>
+          <select formControlName="branch_id">
+            <option value="">Select branch</option>
+            <option *ngFor="let s of branches" [value]="s.id">
+              {{ s.branch_name }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label>faculty</label>
+          <select formControlName="faculty_id">
+            <option value="">Select faculty</option>
+            <option *ngFor="let s of faculty" [value]="s.id">
+              {{ s.first_name }}
+            </option>
+          </select>
+        </div>
         <input formControlName="class_name" placeholder="Class Name" />
         <input formControlName="section" placeholder="Section" />
-        <input formControlName="faculty_id" placeholder="Faculty ID" />
+
         <input formControlName="total_students" placeholder="Total Students" />
         <textarea formControlName="subjects_covered" placeholder="Subjects Covered"></textarea>
 

@@ -30,7 +30,7 @@ import { Modules } from "./modules/modules";
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation, Faculty, FacultyLeave, FacultySalary, Subjects, Gallery, SchoolCalender, Modules, School],
+  imports: [Culturalactivities, FeeManagement, Librarymanagement, HostelRooms, TransportManagement, Medicalrecords, LibraryBookIssue, HostelAllocation, Faculty, FacultyLeave, FacultySalary, Subjects, Gallery, SchoolCalender, Modules, School, Branches, Classes, Students, Timetable, Attendence],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

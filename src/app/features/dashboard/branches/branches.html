@@ -5,11 +5,7 @@
     <h2>Branches</h2>
 
     <div class="header-actions">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search branches..."
-        [(ngModel)]="searchText"
+      <input type="text" class="search-input" placeholder="Search branches..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Branch</button>
@@ -60,18 +56,13 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button
-      class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
       Prev
     </button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button
-      class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">
       Next
     </button>
@@ -85,6 +76,15 @@
     <h3>{{ editId ? 'Edit Branch' : 'Add Branch' }}</h3>
 
     <form [formGroup]="branchForm" class="school-form">
+      <div>
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">
+            {{ s.school_name }}
+          </option>
+        </select>
+      </div>
 
       <div>
         <label>Branch Code</label>
@@ -143,5 +143,3 @@
 
   </div>
 </div>
-
-

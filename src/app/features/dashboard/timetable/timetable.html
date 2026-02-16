@@ -5,11 +5,7 @@
     <h2>Timetable</h2>
 
     <div class="header-actions">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search timetable..."
-        [(ngModel)]="searchText"
+      <input type="text" class="search-input" placeholder="Search timetable..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Timetable</button>
@@ -62,16 +58,13 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
       Prev
     </button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">
       Next
     </button>
@@ -86,10 +79,43 @@
     <h3>{{ editId ? 'Edit Timetable' : 'Add Timetable' }}</h3>
 
     <form [formGroup]="timetableForm" class="school-form">
+      <div>
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">
+            {{ s.school_name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label>branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select branch</option>
+          <option *ngFor="let s of branches" [value]="s.id">
+            {{ s.branch_name }}
+          </option>
+        </select>
+      </div>
 
       <div>
-        <label>Class</label>
-        <input formControlName="class_id" />
+        <label>class</label>
+        <select formControlName="class_id">
+          <option value="">Select Class</option>
+
+          <option *ngFor="let s of classes" [value]="s.id">
+            {{ s.class_name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label>faculty</label>
+        <select formControlName="faculty_id">
+          <option value="">Select faculty</option>
+          <option *ngFor="let s of faculty" [value]="s.id">
+            {{ s.first_name }}
+          </option>
+        </select>
       </div>
 
       <div>
@@ -107,7 +133,8 @@
 
       <div>
         <label>Period</label>
-        <input formControlName="period_number" />
+        <input type="number" formControlName="period_number" />
+
       </div>
 
       <div>
@@ -115,10 +142,7 @@
         <input formControlName="subject" />
       </div>
 
-      <div>
-        <label>Faculty</label>
-        <input formControlName="faculty_id" />
-      </div>
+
 
       <div>
         <label>Start Time</label>
@@ -147,4 +171,3 @@
 
   </div>
 </div>
-

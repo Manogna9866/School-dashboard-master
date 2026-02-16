@@ -6,11 +6,15 @@ import { NotifyService } from '../../../core/services/notify';
 
 @Component({
   selector: 'app-timetable',
-  imports: [ReactiveFormsModule,FormsModule,CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './timetable.html',
   styleUrl: './timetable.scss',
 })
 export class Timetable {
+  classes: any[] = [];
+  faculty: any[] = [];
+  branches: any[] = [];
+  schools: any[] = [];
   timetables: any[] = [];
   filteredTimetables: any[] = [];
   paginatedTimetables: any[] = [];
@@ -21,7 +25,8 @@ export class Timetable {
 
   searchText = '';
   showModal = false;
-  editId: string | null = null;
+  editId: number | null = null;
+
   loading = false;
 
   timetableForm!: FormGroup;
@@ -31,9 +36,10 @@ export class Timetable {
   private notify = inject(NotifyService);
 
   ngOnInit() {
+
     this.timetableForm = this.fb.group({
-      school_id: ['1', Validators.required],
-      branch_id: ['1', Validators.required],
+      school_id: ['', Validators.required],
+      branch_id: ['', Validators.required],
       class_id: ['', Validators.required],
       day_of_week: ['', Validators.required],
       period_number: ['', Validators.required],
@@ -44,24 +50,99 @@ export class Timetable {
       status: ['active', Validators.required]
     });
 
+    this.loadSchools();
     this.loadTimetables();
+
+    /* ===== SCHOOL CHANGE → LOAD BRANCHES ===== */
+    this.timetableForm.get('school_id')?.valueChanges.subscribe((schoolId) => {
+      if (schoolId) {
+        this.branches = [];
+        this.classes = [];
+        this.faculty = [];
+
+        this.timetableForm.patchValue({
+          branch_id: '',
+          class_id: '',
+          faculty_id: ''
+        });
+
+        this.loadBranchesBySchool(Number(schoolId));
+      }
+    });
+
+    /* ===== BRANCH CHANGE → LOAD CLASSES + FACULTY ===== */
+    this.timetableForm.get('branch_id')?.valueChanges.subscribe((branchId) => {
+      if (branchId) {
+        this.classes = [];
+        this.faculty = [];
+
+        this.timetableForm.patchValue({
+          class_id: '',
+          faculty_id: ''
+        });
+
+        this.loadClassesByBranch(Number(branchId));
+        this.loadFacultyByBranch(Number(branchId));
+      }
+    });
   }
 
-  /* ================= LOAD ================= */
+  /* ================= SCHOOLS ================= */
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => {
+        this.schools = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load schools')
+    });
+  }
+
+  /* ================= BRANCHES ================= */
+  loadBranchesBySchool(schoolId: number) {
+    this.service.getBranches().subscribe({
+      next: (res: any) => {
+        this.branches = res.success && res.data?.data
+          ? res.data.data.filter((b: any) => b.school_id == schoolId)
+          : [];
+      },
+      error: () => this.notify.error('Failed to load branches')
+    });
+  }
+
+  /* ================= CLASSES ================= */
+  loadClassesByBranch(branchId: number) {
+    this.service.getClasses().subscribe({
+      next: (res: any) => {
+        this.classes = res.success && res.data?.data
+          ? res.data.data.filter((c: any) => c.branch_id == branchId)
+          : [];
+      },
+      error: () => this.notify.error('Failed to load classes')
+    });
+  }
+
+  /* ================= FACULTY ================= */
+  loadFacultyByBranch(branchId: number) {
+    this.service.getfaculties().subscribe({
+      next: (res: any) => {
+        this.faculty = res.success && res.data?.data
+          ? res.data.data.filter((f: any) => f.branch_id == branchId)
+          : [];
+      },
+      error: () => this.notify.error('Failed to load faculty')
+    });
+  }
+
+  /* ================= TIMETABLE LOAD ================= */
   loadTimetables() {
     this.loading = true;
 
     this.service.getTimetables().subscribe({
       next: (res: any) => {
-        if (res.success) {
-          this.timetables = Array.isArray(res.data?.data)
-            ? res.data.data
-            : [];
-
-          this.applyFilter();
-        } else {
-          this.notify.error('Failed to load timetable');
-        }
+        this.timetables = res.success && Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+        this.applyFilter();
         this.loading = false;
       },
       error: () => {
@@ -77,8 +158,7 @@ export class Timetable {
 
     this.filteredTimetables = this.timetables.filter(t =>
       (t.subject || '').toLowerCase().includes(text) ||
-      (t.day_of_week || '').toLowerCase().includes(text) ||
-      (t.class_id || '').toString().includes(text)
+      (t.day_of_week || '').toLowerCase().includes(text)
     );
 
     this.currentPage = 1;
@@ -105,73 +185,104 @@ export class Timetable {
   /* ================= MODAL ================= */
   openAdd() {
     this.editId = null;
+
     this.timetableForm.reset({
-      school_id: '1',
-      branch_id: '1',
+      school_id: '',
+      branch_id: '',
+      class_id: '',
+      faculty_id: '',
+      day_of_week: '',
+      period_number: '',
+      subject: '',
+      start_time: '',
+      end_time: '',
       status: 'active'
     });
+
+    this.branches = [];
+    this.classes = [];
+    this.faculty = [];
+
     this.showModal = true;
   }
 
+
   openEdit(row: any) {
-    this.editId = row.id;
+    this.editId = Number(row.id);
     this.timetableForm.patchValue(row);
     this.showModal = true;
   }
 
+
   /* ================= SAVE ================= */
   save() {
+
     if (this.timetableForm.invalid) {
       this.notify.error('Please fill all required fields');
+      this.timetableForm.markAllAsTouched();
       return;
     }
 
-    const payload = this.timetableForm.value;
+    const formValue = this.timetableForm.value;
+
+    const payload = {
+      school_id: String(formValue.school_id),
+      branch_id: String(formValue.branch_id),
+      class_id: String(formValue.class_id),
+      faculty_id: String(formValue.faculty_id),
+      day_of_week: formValue.day_of_week,
+      period_number: String(formValue.period_number),
+      subject: formValue.subject?.trim(),
+      start_time: formValue.start_time,
+      end_time: formValue.end_time,
+      status: formValue.status
+    };
+
+    console.log('CREATE Payload:', payload);
+
     this.loading = true;
 
     const request$ = this.editId
-      ? this.service.updateTimetable(this.editId, payload)
+      ? this.service.updateTimetable(String(this.editId), payload)
+      
       : this.service.createTimetable(payload);
 
     request$.subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.notify.success(this.editId ? 'Timetable updated' : 'Timetable created');
+          this.notify.success(
+            this.editId ? 'Updated successfully' : 'Created successfully'
+          );
           this.showModal = false;
-          this.searchText = '';
           this.loadTimetables();
         } else {
-          this.notify.error('Operation failed');
+          this.notify.error(res.message || 'Operation failed');
         }
         this.loading = false;
       },
-      error: () => {
-        this.notify.error('Server error');
+      error: (err) => {
+        console.log('Create Error:', err);
+        this.notify.error(err?.error?.message || 'Server error');
         this.loading = false;
       }
     });
   }
+
+
+
+
+
 
   /* ================= DELETE ================= */
-  delete(id: string) {
+  delete(id: number) {
     if (!confirm('Delete this timetable entry?')) return;
 
-    this.loading = true;
-    this.service.deleteTimetable(id).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.notify.success('Timetable deleted');
-          this.loadTimetables();
-        } else {
-          this.notify.error('Delete failed');
-        }
-        this.loading = false;
+    this.service.deleteTimetable(id.toString()).subscribe({
+      next: () => {
+        this.notify.success('Deleted successfully');
+        this.loadTimetables();
       },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+      error: () => this.notify.error('Delete failed')
     });
   }
-
 }

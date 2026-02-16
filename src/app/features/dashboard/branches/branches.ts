@@ -14,6 +14,7 @@ export class Branches {
   branches: any[] = [];
   filteredBranches: any[] = [];
   paginatedBranches: any[] = [];
+  schools: any[] = [];
 
   /* ================= PAGINATION ================= */
   pages: number[] = [];
@@ -36,16 +37,19 @@ export class Branches {
   /* ================= INIT ================= */
   ngOnInit() {
     this.branchForm = this.fb.group({
-      school_id: ['1', Validators.required],
+      school_id: ['', Validators.required],
       branch_code: ['', Validators.required],
       branch_name: ['', Validators.required],
       principal_name: ['', Validators.required],
       contact_email: ['', [Validators.required, Validators.email]],
       contact_phone: ['', Validators.required],
+      established_year: [''],   // ✅ ADD THIS
       address: ['', Validators.required],
+      remarks: [''],            // ✅ ADD THIS
       status: ['active', Validators.required],
     });
 
+    this.loadSchools();
     this.loadBranches();
   }
 
@@ -81,6 +85,26 @@ export class Branches {
       }
     });
   }
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => {
+        console.log("Schools API:", res);
+
+        if (res.success && res.data?.data) {
+          this.schools = res.data.data;
+        } else {
+          this.schools = [];
+        }
+
+        console.log("Schools array:", this.schools);
+      },
+      error: (err) => {
+        console.error("School API error:", err);
+        this.notify.error('Failed to load schools');
+      }
+    });
+  }
+
 
   /* ================= SEARCH ================= */
   applyFilter() {
@@ -123,11 +147,11 @@ export class Branches {
   openAdd() {
     this.editId = null;
     this.branchForm.reset({
-      school_id: '1',
       status: 'active'
     });
     this.showModal = true;
   }
+
 
   openEdit(branch: any) {
     this.editId = branch.id;
@@ -146,8 +170,12 @@ export class Branches {
       return;
     }
 
-    this.loading = true;
-    const payload = this.branchForm.value;
+    const payload = {
+      ...this.branchForm.value,
+      school_id: Number(this.branchForm.value.school_id)
+    };
+
+    console.log("Sending payload:", payload);
 
     const request$ = this.editId
       ? this.service.updateBranch(this.editId, payload)
@@ -158,19 +186,14 @@ export class Branches {
         if (res.success) {
           this.notify.success(this.editId ? 'Branch updated' : 'Branch created');
           this.showModal = false;
-          this.searchText = '';
           this.loadBranches();
         } else {
-          this.notify.error('Operation failed');
+          this.notify.error(res.message || 'Operation failed');
         }
-        this.loading = false;
-      },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
       }
     });
   }
+
 
   /* ================= DELETE ================= */
   delete(id: string) {
