@@ -11,6 +11,18 @@ import { NotifyService } from '../../../core/services/notify';
   styleUrl: './library-book-issue.scss',
 })
 export class LibraryBookIssue {
+   schools: any[] = [];
+  branches: any[] = [];
+  filteredBranches: any[] = [];
+
+  books: any[] = [];
+  filteredBooksList: any[] = [];
+
+  students: any[] = [];
+  filteredStudents: any[] = [];
+
+  /* ================= ISSUE LIST ================= */
+
   issues: any[] = [];
   filteredIssues: any[] = [];
   paginatedIssues: any[] = [];
@@ -21,7 +33,10 @@ export class LibraryBookIssue {
 
   searchText = '';
   showModal = false;
+
+  // ✅ FIXED TYPE
   editId: string | null = null;
+
   loading = false;
 
   issueForm!: FormGroup;
@@ -30,36 +45,121 @@ export class LibraryBookIssue {
   private fb = inject(FormBuilder);
   private notify = inject(NotifyService);
 
-  ngOnInit() {
+  /* ================= INIT ================= */
+
+  ngOnInit(): void {
+
     this.issueForm = this.fb.group({
-      school_id: ['1', Validators.required],
-      branch_id: ['1', Validators.required],
-      book_id: ['', Validators.required],
-      student_id: ['', Validators.required],
+      school_id: [null, Validators.required],
+      branch_id: [null, Validators.required],
+      book_id: [null, Validators.required],
+      student_id: [null, Validators.required],
       subject_name: ['', Validators.required],
       issue_date: ['', Validators.required],
       due_date: ['', Validators.required],
-      return_date: [''],
+      return_date: [null],
       return_status: ['Issued', Validators.required],
-      fine_amount: ['0'],
-      issued_by: ['', Validators.required],
+      fine_amount: [0],
+      issued_by: [null, Validators.required],
       remarks: ['']
     });
 
+    this.loadSchools();
+    this.loadBranches();
+    this.loadBooks();
+    this.loadStudents();
     this.loadIssues();
+
+    /* SCHOOL CHANGE */
+    this.issueForm.get('school_id')?.valueChanges.subscribe((schoolId: any) => {
+
+      if (!schoolId) {
+        this.filteredBranches = [];
+        this.filteredBooksList = [];
+        this.filteredStudents = [];
+        return;
+      }
+
+      this.filteredBranches = this.branches.filter(
+        (b: any) => Number(b.school_id) === Number(schoolId)
+      );
+
+      this.issueForm.patchValue({
+        branch_id: null,
+        book_id: null,
+        student_id: null
+      });
+    });
+
+    /* BRANCH CHANGE */
+    this.issueForm.get('branch_id')?.valueChanges.subscribe((branchId: any) => {
+
+      if (!branchId) {
+        this.filteredBooksList = [];
+        this.filteredStudents = [];
+        return;
+      }
+
+      this.filteredBooksList = this.books.filter(
+        (b: any) => Number(b.branch_id) === Number(branchId)
+      );
+
+      this.filteredStudents = this.students.filter(
+        (s: any) => Number(s.branch_id) === Number(branchId)
+      );
+
+      this.issueForm.patchValue({
+        book_id: null,
+        student_id: null
+      });
+    });
   }
 
-  /* ================= LOAD ================= */
+  /* ================= LOAD METHODS ================= */
+
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => {
+        this.schools = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load schools')
+    });
+  }
+
+  loadBranches() {
+    this.service.getBranches().subscribe({
+      next: (res: any) => {
+        this.branches = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load branches')
+    });
+  }
+
+  loadBooks() {
+    this.service.getBooks().subscribe({
+      next: (res: any) => {
+        this.books = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load books')
+    });
+  }
+
+  loadStudents() {
+    this.service.getstudents().subscribe({
+      next: (res: any) => {
+        this.students = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load students')
+    });
+  }
+
   loadIssues() {
     this.loading = true;
 
     this.service.getLibraryBookIssues().subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.issues = Array.isArray(res.data?.data)
-            ? res.data.data
-            : [];
-
+          this.issues = Array.isArray(res.data?.data) ? res.data.data : [];
           this.applyFilter();
         } else {
           this.notify.error('Failed to load records');
@@ -73,7 +173,8 @@ export class LibraryBookIssue {
     });
   }
 
-  /* ================= SEARCH ================= */
+  /* ================= SEARCH + PAGINATION ================= */
+
   applyFilter() {
     const text = this.searchText.toLowerCase();
 
@@ -88,7 +189,6 @@ export class LibraryBookIssue {
     this.updatePagination();
   }
 
-  /* ================= PAGINATION ================= */
   updatePagination() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -106,102 +206,88 @@ export class LibraryBookIssue {
   }
 
   /* ================= MODAL ================= */
+
   openAdd() {
     this.editId = null;
 
     this.issueForm.reset({
-      school_id: '1',
-      branch_id: '1',
+      school_id: null,
+      branch_id: null,
+      book_id: null,
+      student_id: null,
       return_status: 'Issued',
       fine_amount: 0,
-      issued_by: '1'
+      issued_by: null
     });
+
+    this.filteredBranches = [];
+    this.filteredBooksList = [];
+    this.filteredStudents = [];
 
     this.showModal = true;
   }
 
+  openEdit(issue: any) {
 
-  openEdit(data: any) {
-    this.editId = data.id;
+    // ✅ IMPORTANT FIX
+    this.editId = issue.id?.toString();
+
+    this.filteredBranches = this.branches.filter(
+      (b: any) => Number(b.school_id) === Number(issue.school_id)
+    );
+
+    this.filteredBooksList = this.books.filter(
+      (b: any) => Number(b.branch_id) === Number(issue.branch_id)
+    );
+
+    this.filteredStudents = this.students.filter(
+      (s: any) => Number(s.branch_id) === Number(issue.branch_id)
+    );
 
     this.issueForm.patchValue({
-      ...data,
-      issue_date: data.issue_date?.substring(0, 10),
-      due_date: data.due_date?.substring(0, 10),
-      return_date: data.return_date ? data.return_date.substring(0, 10) : ''
+      ...issue,
+      issue_date: issue.issue_date?.substring(0, 10),
+      due_date: issue.due_date?.substring(0, 10),
+      return_date: issue.return_date ? issue.return_date.substring(0, 10) : null
     });
 
     this.showModal = true;
   }
 
   /* ================= SAVE ================= */
+
   save() {
 
     if (this.issueForm.invalid) {
-      console.log(this.issueForm.value);
       this.notify.error('Please fill all required fields');
       return;
     }
 
-    const formValue = this.issueForm.value;
-
     const payload = {
-      school_id: '1',
-      branch_id: '1',
-      book_id: formValue.book_id,
-      student_id: formValue.student_id,
-      subject_name: formValue.subject_name,
-      issue_date: formValue.issue_date,
-      due_date: formValue.due_date,
-      return_date: formValue.return_date || null,
-      return_status: formValue.return_status,
-      fine_amount: parseFloat(formValue.fine_amount || 0),
-      issued_by: formValue.issued_by,
-      remarks: formValue.remarks
+      ...this.issueForm.value,
+      school_id: Number(this.issueForm.value.school_id),
+      branch_id: Number(this.issueForm.value.branch_id),
+      book_id: Number(this.issueForm.value.book_id),
+      student_id: Number(this.issueForm.value.student_id),
+      fine_amount: Number(this.issueForm.value.fine_amount || 0),
+      issued_by: Number(this.issueForm.value.issued_by),
+      return_date: this.issueForm.value.return_date || null
     };
 
     this.loading = true;
 
-    const request$ = this.editId
+    const request$ = this.editId !== null
       ? this.service.updateLibraryBookIssue(this.editId, payload)
       : this.service.createLibraryBookIssue(payload);
 
     request$.subscribe({
       next: (res: any) => {
-        console.log(res);
-
         if (res.success) {
           this.notify.success(this.editId ? 'Updated successfully' : 'Added successfully');
           this.showModal = false;
           this.loadIssues();
         } else {
           this.notify.error(res.message || 'Operation failed');
-        }
-
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.notify.error('Server error');
-        this.loading = false;
-      }
-    });
-  }
-
-
-  /* ================= DELETE ================= */
-  delete(id: string) {
-    if (!confirm('Delete this record?')) return;
-
-    this.loading = true;
-
-    this.service.deleteLibraryBookIssue(id).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.notify.success('Deleted successfully');
-          this.loadIssues();
-        } else {
-          this.notify.error('Delete failed');
         }
         this.loading = false;
       },
@@ -211,4 +297,25 @@ export class LibraryBookIssue {
       }
     });
   }
+
+  /* ================= DELETE ================= */
+
+  delete(id: number) {
+
+    if (!confirm('Delete this record?')) return;
+
+    this.service.deleteLibraryBookIssue(id.toString()).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.notify.success('Deleted successfully');
+          this.loadIssues();
+        } else {
+          this.notify.error('Delete failed');
+        }
+      },
+      error: () => this.notify.error('Server error')
+    });
+  }
 }
+
+

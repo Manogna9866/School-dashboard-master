@@ -5,11 +5,7 @@
     <h2>School Calendar</h2>
 
     <div class="header-actions">
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search calendar..."
-        [(ngModel)]="searchText"
+      <input class="search-input" type="text" placeholder="Search calendar..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Event</button>
@@ -64,14 +60,11 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">Prev</button>
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">Next</button>
   </div>
 
@@ -91,11 +84,18 @@
       </div>
       <div>
         <label>School ID</label>
-        <input formControlName="school_id" />
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">{{ s.school_name }}</option>
+        </select>
       </div>
+
       <div>
         <label>Branch ID</label>
-        <input formControlName="branch_id" />
+        <select formControlName="branch_id">
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of branches" [value]="b.id">{{ b.branch_name }}</option>
+        </select>
       </div>
 
       <div>
@@ -157,4 +157,3 @@
 
   </div>
 </div>
-

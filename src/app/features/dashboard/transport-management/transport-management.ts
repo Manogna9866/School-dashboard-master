@@ -11,14 +11,23 @@ import { CommonModule } from '@angular/common';
   styleUrl: './transport-management.scss',
 })
 export class TransportManagement {
+  schools: any[] = [];
+  branches: any[] = [];
+  students: any[] = [];
+
+  filteredBranches: any[] = [];
+  filteredStudents: any[] = [];
+
   transports: any[] = [];
   filteredTransports: any[] = [];
   paginatedTransports: any[] = [];
 
+  /* ================= PAGINATION ================= */
   pages: number[] = [];
   currentPage = 1;
   pageSize = 5;
 
+  /* ================= UI STATE ================= */
   searchText = '';
   showModal = false;
   editId: string | null = null;
@@ -26,14 +35,17 @@ export class TransportManagement {
 
   transportForm!: FormGroup;
 
+  /* ================= INJECTION ================= */
   private service = inject(AuthService);
   private fb = inject(FormBuilder);
   private notify = inject(NotifyService);
 
+  /* ================= INIT ================= */
   ngOnInit() {
+
     this.transportForm = this.fb.group({
-      school_id: ['1', Validators.required],
-      branch_id: ['1', Validators.required],
+      school_id: ['', Validators.required],
+      branch_id: ['', Validators.required],
       student_id: ['', Validators.required],
       route_number: ['', Validators.required],
       bus_number: ['', Validators.required],
@@ -48,38 +60,93 @@ export class TransportManagement {
       remarks: ['']
     });
 
-
+    this.loadSchools();
+    this.loadBranches();
+    this.loadStudents();
     this.loadTransport();
+
+    /* 🔥 SCHOOL CHANGE → FILTER BRANCHES */
+    this.transportForm.get('school_id')?.valueChanges.subscribe(schoolId => {
+      if (!schoolId) {
+        this.filteredBranches = [];
+        this.filteredStudents = [];
+        this.transportForm.patchValue({ branch_id: '', student_id: '' });
+        return;
+      }
+
+      this.filteredBranches = this.branches.filter(b => b.school_id == schoolId);
+      this.filteredStudents = [];
+      this.transportForm.patchValue({ branch_id: '', student_id: '' });
+    });
+
+    /* 🔥 BRANCH CHANGE → FILTER STUDENTS */
+    this.transportForm.get('branch_id')?.valueChanges.subscribe(branchId => {
+      if (!branchId) {
+        this.filteredStudents = [];
+        this.transportForm.patchValue({ student_id: '' });
+        return;
+      }
+
+      this.filteredStudents = this.students.filter(s => s.branch_id == branchId);
+      this.transportForm.patchValue({ student_id: '' });
+
+      const selectedBranch = this.branches.find(b => b.id == branchId);
+      if (selectedBranch) {
+        this.transportForm.patchValue({ school_id: selectedBranch.school_id }, { emitEvent: false });
+      }
+    });
+
+    /* 🔥 STUDENT CHANGE → ENSURE SCHOOL & BRANCH */
+    this.transportForm.get('student_id')?.valueChanges.subscribe(studentId => {
+      if (!studentId) return;
+
+      const selectedStudent = this.students.find(s => s.id == studentId);
+      if (selectedStudent) {
+        this.transportForm.patchValue({
+          school_id: selectedStudent.school_id,
+          branch_id: selectedStudent.branch_id
+        }, { emitEvent: false });
+      }
+    });
   }
 
-  /* ================= LOAD ================= */
+  /* ================= LOAD DATA ================= */
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => this.schools = res.success && res.data?.data ? res.data.data : [],
+      error: () => this.notify.error('Failed to load schools')
+    });
+  }
+
+  loadBranches() {
+    this.service.getBranches().subscribe({
+      next: (res: any) => this.branches = res.success && res.data?.data ? res.data.data : [],
+      error: () => this.notify.error('Failed to load branches')
+    });
+  }
+
+  loadStudents() {
+    this.service.getstudents().subscribe({
+      next: (res: any) => this.students = res.success && res.data?.data ? res.data.data : [],
+      error: () => this.notify.error('Failed to load students')
+    });
+  }
+
   loadTransport() {
     this.loading = true;
-
     this.service.getTransports().subscribe({
       next: (res: any) => {
-        if (res.success) {
-          this.transports = Array.isArray(res.data?.data)
-            ? res.data.data
-            : [];
-
-          this.applyFilter();
-        } else {
-          this.notify.error('Failed to load transport records');
-        }
+        this.transports = res.success && Array.isArray(res.data?.data) ? res.data.data : [];
+        this.applyFilter();
         this.loading = false;
       },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+      error: () => { this.notify.error('Server error'); this.loading = false; }
     });
   }
 
   /* ================= SEARCH ================= */
   applyFilter() {
     const text = this.searchText.toLowerCase();
-
     this.filteredTransports = this.transports.filter(t =>
       t.student_id?.toString().includes(text) ||
       t.route_number?.toLowerCase().includes(text) ||
@@ -87,7 +154,6 @@ export class TransportManagement {
       t.driver_name?.toLowerCase().includes(text) ||
       t.transport_status?.toLowerCase().includes(text)
     );
-
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -96,7 +162,6 @@ export class TransportManagement {
   updatePagination() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
-
     this.paginatedTransports = this.filteredTransports.slice(start, end);
 
     const totalPages = Math.ceil(this.filteredTransports.length / this.pageSize);
@@ -112,44 +177,42 @@ export class TransportManagement {
   /* ================= MODAL ================= */
   openAdd() {
     this.editId = null;
-
     this.transportForm.reset({
-      school_id: '1',
-      branch_id: '1',
+      school_id: '',
+      branch_id: '',
+      student_id: '',
       transport_status: 'Active'
     });
-
+    this.filteredBranches = [];
+    this.filteredStudents = [];
     this.showModal = true;
   }
 
-
   openEdit(data: any) {
     this.editId = data.id;
+
+    this.filteredBranches = this.branches.filter(b => b.school_id == data.school_id);
+    this.filteredStudents = this.students.filter(s => s.branch_id == data.branch_id);
+
     this.transportForm.patchValue(data);
     this.showModal = true;
   }
 
   /* ================= SAVE ================= */
   save() {
-
     if (this.transportForm.invalid) {
       this.notify.error('Please fill all required fields');
       return;
     }
 
     const formValue = this.transportForm.value;
-
-    const formatTime = (time: string) => {
-      if (!time) return null;
-      return time.length === 5 ? time + ':00' : time;
-      // if HH:mm → add seconds
-      // if already HH:mm:ss → keep as is
-    };
+    const formatTime = (time: string) => time?.length === 5 ? time + ':00' : time;
 
     const payload = {
       ...formValue,
-      school_id: '1',
-      branch_id: '1',
+      school_id: Number(formValue.school_id),
+      branch_id: Number(formValue.branch_id),
+      student_id: Number(formValue.student_id),
       pickup_time: formatTime(formValue.pickup_time),
       drop_time: formatTime(formValue.drop_time),
       transport_fee: parseFloat(formValue.transport_fee)
@@ -172,21 +235,15 @@ export class TransportManagement {
         }
         this.loading = false;
       },
-      error: (err) => {
-        console.error(err);
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+      error: () => { this.notify.error('Server error'); this.loading = false; }
     });
   }
-
-
 
   /* ================= DELETE ================= */
   delete(id: string) {
     if (!confirm('Delete this transport record?')) return;
-
     this.loading = true;
+
     this.service.deleteTransport(id).subscribe({
       next: (res: any) => {
         if (res.success) {
@@ -197,10 +254,7 @@ export class TransportManagement {
         }
         this.loading = false;
       },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+      error: () => { this.notify.error('Server error'); this.loading = false; }
     });
   }
 }

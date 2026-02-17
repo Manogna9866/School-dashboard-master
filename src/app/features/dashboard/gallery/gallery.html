@@ -79,6 +79,25 @@
         <h3>{{ editId ? 'Edit Gallery' : 'Add Gallery' }}</h3>
 
         <form [formGroup]="galleryForm" class="school-form">
+            <div>
+                <label>School</label>
+                <select formControlName="school_id">
+                    <option value="">Select School</option>
+                    <option *ngFor="let s of schools" [value]="s.id">
+                        {{ s.school_name }}
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label>Branch</label>
+                <select formControlName="branch_id">
+                    <option value="">Select Branch</option>
+                    <option *ngFor="let b of branches" [value]="b.id">
+                        {{ b.branch_name }}
+                    </option>
+                </select>
+            </div>
 
             <div>
                 <label>Event Name</label>

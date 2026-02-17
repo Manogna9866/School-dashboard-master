@@ -67,21 +67,32 @@
         <h3>{{ editId ? 'Edit Issue' : 'Issue Book' }}</h3>
 
         <form [formGroup]="issueForm" class="school-form">
-            <div>
-                <label>Book ID</label>
-                <input formControlName="book_id">
+            <select formControlName="school_id">
+                <option value="">Select School</option>
+                <option *ngFor="let s of schools" [value]="s.id">
+                    {{ s.school_name }}
+                </option>
+            </select>
+            <div><select formControlName="branch_id">
+                    <option value="">Select Branch</option>
+                    <option *ngFor="let b of branches" [value]="b.id">
+                        {{ b.branch_name }}
+                    </option>
+                </select>
             </div>
-             <div>
-                <label>Branch id</label>
-                <input formControlName="branch_id">
+            <div><select formControlName="book_id">
+                    <option value="">Select Book</option>
+                    <option *ngFor="let b of books" [value]="b.id">
+                        {{ b.title }}
+                    </option>
+                </select>
             </div>
             <div>
-                <label>Book ID</label>
-                <input formControlName="school_id">
-            </div>
-            <div>
-                <label>Student ID</label>
-                <input formControlName="student_id">
+                <label>Student</label>
+                <select formControlName="student_id">
+                    <option value="">Select Student</option>
+                    <option *ngFor="let s of students" [value]="s.id">{{ s.first_name }} {{ s.last_name }}</option>
+                </select>
             </div>
 
             <div>

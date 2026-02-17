@@ -1,3 +1,4 @@
+import { filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -6,12 +7,21 @@ import { NotifyService } from '../../../core/services/notify';
 
 @Component({
   selector: 'app-hostel-allocation',
-  imports: [ReactiveFormsModule,FormsModule,CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './hostel-allocation.html',
   styleUrl: './hostel-allocation.scss',
 })
 export class HostelAllocation {
+  schools: any[] = [];
+  branches: any[] = [];
+  rooms: any[] = [];
+  students: any[] = [];
 
+  filteredBranches: any[] = [];
+  filteredRooms: any[] = [];
+  filteredStudents: any[] = [];
+
+  /* ================= TABLE DATA ================= */
 
   allocations: any[] = [];
   filteredAllocations: any[] = [];
@@ -32,10 +42,13 @@ export class HostelAllocation {
   private fb = inject(FormBuilder);
   private notify = inject(NotifyService);
 
+  /* ================= INIT ================= */
+
   ngOnInit() {
+
     this.allocationForm = this.fb.group({
-      school_id: ['1', Validators.required],
-      branch_id: ['1', Validators.required],
+      school_id: ['', Validators.required],
+      branch_id: ['', Validators.required],
       room_id: ['', Validators.required],
       student_id: ['', Validators.required],
       allocation_date: ['', Validators.required],
@@ -44,10 +57,91 @@ export class HostelAllocation {
       remarks: ['']
     });
 
+    this.loadSchools();
+    this.loadBranches();
+    this.loadRooms();
+    this.loadStudents();
     this.loadAllocations();
+
+    /* 🔥 SCHOOL CHANGE → FILTER BRANCH */
+    this.allocationForm.get('school_id')?.valueChanges.subscribe(schoolId => {
+
+      if (!schoolId) {
+        this.filteredBranches = [];
+        this.filteredRooms = [];
+        this.filteredStudents = [];
+        return;
+      }
+
+      this.filteredBranches = this.branches.filter(
+        (b: any) => b.school_id == schoolId
+      );
+
+      this.allocationForm.patchValue({
+        branch_id: '',
+        room_id: '',
+        student_id: ''
+      });
+    });
+
+    /* 🔥 BRANCH CHANGE → FILTER ROOM + STUDENTS */
+    this.allocationForm.get('branch_id')?.valueChanges.subscribe(branchId => {
+
+      if (!branchId) return;
+
+      this.filteredRooms = this.rooms.filter(
+        (r: any) => r.branch_id == branchId
+      );
+
+      this.filteredStudents = this.students.filter(
+        (s: any) => s.branch_id == branchId
+      );
+
+      this.allocationForm.patchValue({
+        room_id: '',
+        student_id: ''
+      });
+    });
   }
 
-  /* ================= LOAD ================= */
+  /* ================= LOAD METHODS ================= */
+
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => {
+        this.schools = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load schools')
+    });
+  }
+
+  loadBranches() {
+    this.service.getBranches().subscribe({
+      next: (res: any) => {
+        this.branches = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load branches')
+    });
+  }
+
+  loadRooms() {
+    this.service.getHostelRooms().subscribe({
+      next: (res: any) => {
+        this.rooms = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load rooms')
+    });
+  }
+
+  loadStudents() {
+    this.service.getstudents().subscribe({
+      next: (res: any) => {
+        this.students = res.success && res.data?.data ? res.data.data : [];
+      },
+      error: () => this.notify.error('Failed to load students')
+    });
+  }
+
   loadAllocations() {
     this.loading = true;
 
@@ -57,7 +151,6 @@ export class HostelAllocation {
           this.allocations = Array.isArray(res.data?.data)
             ? res.data.data
             : [];
-
           this.applyFilter();
         } else {
           this.notify.error('Failed to load allocations');
@@ -72,6 +165,7 @@ export class HostelAllocation {
   }
 
   /* ================= SEARCH ================= */
+
   applyFilter() {
     const text = this.searchText.toLowerCase();
 
@@ -85,7 +179,6 @@ export class HostelAllocation {
     this.updatePagination();
   }
 
-  /* ================= PAGINATION ================= */
   updatePagination() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -103,20 +196,36 @@ export class HostelAllocation {
   }
 
   /* ================= MODAL ================= */
+
   openAdd() {
     this.editId = null;
 
     this.allocationForm.reset({
-      school_id: '1',
-      branch_id: '1',
       allocation_status: 'allocated'
     });
+
+    this.filteredBranches = [];
+    this.filteredRooms = [];
+    this.filteredStudents = [];
 
     this.showModal = true;
   }
 
   openEdit(data: any) {
+
     this.editId = data.id;
+
+    this.filteredBranches = this.branches.filter(
+      (b: any) => b.school_id == data.school_id
+    );
+
+    this.filteredRooms = this.rooms.filter(
+      (r: any) => r.branch_id == data.branch_id
+    );
+
+    this.filteredStudents = this.students.filter(
+      (s: any) => s.branch_id == data.branch_id
+    );
 
     this.allocationForm.patchValue({
       ...data,
@@ -128,6 +237,7 @@ export class HostelAllocation {
   }
 
   /* ================= SAVE ================= */
+
   save() {
 
     if (this.allocationForm.invalid) {
@@ -135,17 +245,13 @@ export class HostelAllocation {
       return;
     }
 
-    const formValue = this.allocationForm.value;
-
     const payload = {
-      school_id: '1',
-      branch_id: '1',
-      room_id: formValue.room_id,
-      student_id: formValue.student_id,
-      allocation_date: formValue.allocation_date,
-      vacate_date: formValue.vacate_date || null,
-      allocation_status: formValue.allocation_status,
-      remarks: formValue.remarks
+      ...this.allocationForm.value,
+      school_id: Number(this.allocationForm.value.school_id),
+      branch_id: Number(this.allocationForm.value.branch_id),
+      room_id: Number(this.allocationForm.value.room_id),
+      student_id: Number(this.allocationForm.value.student_id),
+      vacate_date: this.allocationForm.value.vacate_date || null
     };
 
     this.loading = true;
@@ -172,11 +278,8 @@ export class HostelAllocation {
     });
   }
 
-  /* ================= DELETE ================= */
   delete(id: string) {
     if (!confirm('Delete this allocation?')) return;
-
-    this.loading = true;
 
     this.service.deleteHostelAllocation(id).subscribe({
       next: (res: any) => {
@@ -186,12 +289,10 @@ export class HostelAllocation {
         } else {
           this.notify.error('Delete failed');
         }
-        this.loading = false;
       },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+      error: () => this.notify.error('Server error')
     });
   }
 }
+
+

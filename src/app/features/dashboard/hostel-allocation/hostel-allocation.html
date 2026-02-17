@@ -63,24 +63,44 @@
         <h3>{{ editId ? 'Edit Allocation' : 'Add Allocation' }}</h3>
 
         <form [formGroup]="allocationForm">
-
-            <!-- DO NOT REMOVE -->
             <div>
-                <label>School ID</label>
-                <input formControlName="school_id">
-            </div>
-            <div>
-                <label>Branch ID</label>
-                <input formControlName="branch_id">
-            </div>
-            <div>
-                <label>Room ID</label>
-                <input formControlName="room_id">
+                <label>School</label>
+                <select formControlName="school_id">
+                    <option value="">Select School</option>
+                    <option *ngFor="let s of schools" [value]="s.id">
+                        {{ s.school_name }}
+                    </option>
+                </select>
             </div>
 
             <div>
-                <label>Student ID</label>
-                <input formControlName="student_id">
+                <label>Branch</label>
+                <select formControlName="branch_id">
+                    <option value="">Select Branch</option>
+                    <option *ngFor="let b of filteredBranches" [value]="b.id">
+                        {{ b.branch_name }}
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label>Room</label>
+                <select formControlName="room_id">
+                    <option value="">Select Room</option>
+                    <option *ngFor="let r of filteredRooms" [value]="r.id">
+                        {{ r.room_number }}
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label>Student</label>
+                <select formControlName="student_id">
+                    <option value="">Select Student</option>
+                    <option *ngFor="let s of filteredStudents" [value]="s.id">
+                        {{ s.first_name }} {{ s.last_name }}
+                    </option>
+                </select>
             </div>
 
             <div>

@@ -5,11 +5,7 @@
     <h2>Library Management</h2>
 
     <div class="header-actions">
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search books..."
-        [(ngModel)]="searchText"
+      <input class="search-input" type="text" placeholder="Search books..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Book</button>
@@ -43,8 +39,7 @@
           <td>{{ b.copies_total }}</td>
           <td>{{ b.copies_available }}</td>
           <td>
-            <span class="status" 
-                  [class.active]="b.availability_status === 'Available'">
+            <span class="status" [class.active]="b.availability_status === 'Available'">
               {{ b.availability_status }}
             </span>
           </td>
@@ -64,14 +59,11 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">Prev</button>
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">Next</button>
   </div>
 </div>
@@ -82,12 +74,22 @@
 
     <form [formGroup]="bookForm" class="school-form">
       <div>
-        <label>BRACH ID</label>
-        <input formControlName="branch_id" />
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">
+            {{ s.school_name }}
+          </option>
+        </select>
       </div>
       <div>
-        <label>School id</label>
-        <input formControlName="school_id" />
+        <label>Branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of branches" [value]="b.id">
+            {{ b.branch_name }}
+          </option>
+        </select>
       </div>
       <div>
         <label>Title</label>
@@ -141,4 +143,3 @@
 
   </div>
 </div>
-

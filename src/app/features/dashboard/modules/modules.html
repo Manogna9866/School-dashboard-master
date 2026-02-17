@@ -8,13 +8,8 @@
     </div>
 
     <div class="right">
-      <input
-        type="text"
-        placeholder="Search module..."
-        [(ngModel)]="searchText"
-        (input)="applyFilter()"
-        class="search-box"
-      />
+      <input type="text" placeholder="Search module..." [(ngModel)]="searchText" (input)="applyFilter()"
+        class="search-box" />
 
       <button class="btn-primary" (click)="openAdd()">
         + Add Module
@@ -42,11 +37,7 @@
           <td>{{ m.module_name }}</td>
 
           <td>
-            <span
-              class="status"
-              [class.active]="m.status === 'active'"
-              [class.inactive]="m.status === 'inactive'"
-            >
+            <span class="status" [class.active]="m.status === 'active'" [class.inactive]="m.status === 'inactive'">
               {{ m.status }}
             </span>
           </td>
@@ -66,15 +57,13 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button (click)="changePage(currentPage - 1)"
-            [disabled]="currentPage === 1">
+    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
       Prev
     </button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button (click)="changePage(currentPage + 1)"
-            [disabled]="currentPage === pages.length">
+    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === pages.length">
       Next
     </button>
   </div>
@@ -85,7 +74,23 @@
     <h3>{{ editId ? 'Edit Module' : 'Add Module' }}</h3>
 
     <form [formGroup]="moduleForm" class="form-grid">
-
+      <div>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">{{ s.school_name }}</option>
+        </select>
+      </div>
+      <div><select formControlName="branch_id">
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of branches" [value]="b.id">{{ b.branch_name }}</option>
+        </select>
+      </div>
+       <div>
+        <select formControlName="student_id">
+          <option value="">Select Student</option>
+          <option *ngFor="let s of students" [value]="s.id">{{ s.first_name }} {{s.last_name}}</option>
+        </select>
+       </div>
       <div>
         <label>Module Key</label>
         <input formControlName="module_key" />
@@ -118,4 +123,3 @@
 
   </div>
 </div>
-

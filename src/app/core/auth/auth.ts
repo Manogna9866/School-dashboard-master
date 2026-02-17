@@ -257,20 +257,21 @@ export class AuthService {
     return this.api.put<any>(`fee_management/${id}`, payload);
   }
   deletefee(id: string) {
-    return this.api.delete<any>(`fee_management/${id}`);    }
-    //librarybooks//
+    return this.api.delete<any>(`fee_management/${id}`);
+  }
+  //librarybooks//
   getBooks() {
     return this.api.get<any>('library_books');
   }
   createBook(payload: any) {
     return this.api.post<any>('library_books', payload);
-  }  
+  }
   updateBook(id: string, payload: any) {
     return this.api.put<any>(`library_books/${id}`, payload);
   }
   deleteBook(id: string) {
     return this.api.delete<any>(`library_books/${id}`);
-  } 
+  }
   //hostelrooms//
   getHostelRooms() {
     return this.api.get<any>('hostel_rooms');
@@ -283,7 +284,7 @@ export class AuthService {
   }
   deleteHostelRoom(id: string) {
     return this.api.delete<any>(`hostel_rooms/${id}`);
-  }  
+  }
   //transportmanagement//
   getTransports() {
     return this.api.get<any>('transport');
@@ -309,20 +310,21 @@ export class AuthService {
   }
   deleteMedicalRecord(id: string) {
     return this.api.delete<any>(`medical_records/${id}`);
-  } 
+  }
   //librarybooks//  
   getLibraryBookIssues() {
     return this.api.get<any>('library_book_issue');
   }
   createLibraryBookIssue(payload: any) {
     return this.api.post<any>('library_book_issue', payload);
-  }  
+  }
   updateLibraryBookIssue(id: string, payload: any) {
     return this.api.put<any>(`library_book_issue/${id}`, payload);
   }
+
   deleteLibraryBookIssue(id: string) {
     return this.api.delete<any>(`library_book_issue/${id}`);
-  } 
+  }
   //hostelallocation//
   getHostelAllocations() {
     return this.api.get<any>('hostel_allocations');
@@ -335,7 +337,7 @@ export class AuthService {
   }
   deleteHostelAllocation(id: string) {
     return this.api.delete<any>(`hostel_allocations/${id}`);
-  } 
+  }
   //facultyleave//
   getFacultyLeaves() {
     return this.api.get<any>('faculty_leave_management');
@@ -348,7 +350,7 @@ export class AuthService {
   }
   deleteFacultyLeave(id: string) {
     return this.api.delete<any>(`faculty_leave_management/${id}`);
-  } 
+  }
   //faculty-salry/
   getFacultySalaries() {
     return this.api.get<any>('faculty_salary');
@@ -361,7 +363,7 @@ export class AuthService {
   }
   deleteFacultySalary(id: string) {
     return this.api.delete<any>(`faculty_salary/${id}`);
-  } 
+  }
   //subjects//
   getSubjects() {
     return this.api.get<any>('subjects');
@@ -374,18 +376,18 @@ export class AuthService {
   }
   deletesubject(id: string) {
     return this.api.delete<any>(`subjects/${id}`);
-  } 
+  }
   //gallery//
-  getGallery() {  
-    return this.api.get<any>('gallery');    
+  getGallery() {
+    return this.api.get<any>('gallery');
   }
   createGallery(payload: any) {
     return this.api.post<any>('gallery', payload);
   }
   updateGallery(id: string, payload: any) {
     return this.api.post<any>(`gallery/${id}`, payload);
-  }     
-    
+  }
+
   deleteGallery(id: string) {
     return this.api.delete<any>(`gallery/${id}`);
   }
@@ -403,7 +405,7 @@ export class AuthService {
     return this.api.delete<any>(`school_calendar/${id}`);
   }
   //modules//
- getModules() {
+  getModules() {
     return this.api.get<any>('modules');
   }
   createModules(payload: any) {
@@ -414,7 +416,7 @@ export class AuthService {
   }
   deleteModules(id: string) {
     return this.api.delete<any>(`modules/${id}`);
-   }
+  }
   //exams//
   getExams() {
     return this.api.get<any>('exam');

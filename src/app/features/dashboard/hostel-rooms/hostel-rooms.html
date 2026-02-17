@@ -5,11 +5,7 @@
     <h2>Hostel Rooms</h2>
 
     <div class="header-actions">
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search rooms..."
-        [(ngModel)]="searchText"
+      <input class="search-input" type="text" placeholder="Search rooms..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Room</button>
@@ -41,8 +37,7 @@
           <td>{{ r.capacity }}</td>
           <td>{{ r.room_type }}</td>
           <td>
-            <span class="status"
-              [class.active]="r.availability === 'available'">
+            <span class="status" [class.active]="r.availability === 'available'">
               {{ r.availability }}
             </span>
           </td>
@@ -64,14 +59,11 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">Prev</button>
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">Next</button>
   </div>
 </div>
@@ -82,8 +74,26 @@
 
     <form [formGroup]="roomForm" class="school-form">
 
-      <input type="hidden" formControlName="school_id" />
-      <input type="hidden" formControlName="branch_id" />
+      <div>
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">
+            {{ s.school_name }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label>Branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of filteredBranches" [value]="b.id">
+            {{ b.branch_name }}
+          </option>
+        </select>
+      </div>
+
 
       <div>
         <label>Hostel Name</label>
@@ -143,4 +153,3 @@
 
   </div>
 </div>
-

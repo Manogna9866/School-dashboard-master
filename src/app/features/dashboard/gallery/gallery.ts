@@ -11,13 +11,21 @@ import { CommonModule } from '@angular/common';
   styleUrl: './gallery.scss',
 })
 export class Gallery {
+   schools: any[] = [];
+  branches: any[] = [];
+  filteredBranches: any[] = [];
+
   gallery: any[] = [];
   filteredGallery: any[] = [];
   paginatedGallery: any[] = [];
 
+  /* ================= PAGINATION ================= */
+
   pages: number[] = [];
   currentPage = 1;
   pageSize = 5;
+
+  /* ================= UI STATE ================= */
 
   searchText = '';
   showModal = false;
@@ -27,25 +35,85 @@ export class Gallery {
   galleryForm!: FormGroup;
   selectedFile!: File;
 
-
+  /* ================= INJECTION ================= */
 
   private service = inject(AuthService);
   private fb = inject(FormBuilder);
   private notify = inject(NotifyService);
 
+  /* ================= INIT ================= */
+
   ngOnInit() {
+
     this.galleryForm = this.fb.group({
-      school_id: ['1', Validators.required],
-      branch_id: ['1', Validators.required],
+      school_id: ['', Validators.required],
+      branch_id: ['', Validators.required],
       event_name: ['', Validators.required],
       image_title: ['', Validators.required],
       status: ['active', Validators.required],
     });
 
+    this.loadSchools();
+    this.loadBranches();
     this.loadGallery();
+
+    /* 🔥 SCHOOL CHANGE → FILTER BRANCHES */
+    this.galleryForm.get('school_id')?.valueChanges.subscribe(schoolId => {
+
+      if (!schoolId) {
+        this.filteredBranches = [];
+        this.galleryForm.patchValue({ branch_id: '' });
+        return;
+      }
+
+      this.filteredBranches = this.branches.filter(
+        (b: any) => b.school_id == schoolId
+      );
+
+      this.galleryForm.patchValue({ branch_id: '' });
+    });
+
+    /* 🔥 BRANCH CHANGE → ENSURE SCHOOL MATCH */
+    this.galleryForm.get('branch_id')?.valueChanges.subscribe(branchId => {
+
+      if (!branchId) return;
+
+      const selectedBranch = this.branches.find(
+        (b: any) => b.id == branchId
+      );
+
+      if (selectedBranch) {
+        this.galleryForm.patchValue({
+          school_id: selectedBranch.school_id
+        }, { emitEvent: false });
+      }
+    });
   }
 
-  /* ================= LOAD ================= */
+  /* ================= LOAD DATA ================= */
+
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => {
+        this.schools = res.success && res.data?.data
+          ? res.data.data
+          : [];
+      },
+      error: () => this.notify.error('Failed to load schools')
+    });
+  }
+
+  loadBranches() {
+    this.service.getBranches().subscribe({
+      next: (res: any) => {
+        this.branches = res.success && res.data?.data
+          ? res.data.data
+          : [];
+      },
+      error: () => this.notify.error('Failed to load branches')
+    });
+  }
+
   loadGallery() {
     this.loading = true;
 
@@ -55,7 +123,6 @@ export class Gallery {
           this.gallery = Array.isArray(res.data?.data)
             ? res.data.data
             : [];
-
           this.applyFilter();
         } else {
           this.notify.error('Failed to load gallery');
@@ -70,12 +137,13 @@ export class Gallery {
   }
 
   /* ================= SEARCH ================= */
+
   applyFilter() {
     const text = this.searchText.toLowerCase();
 
     this.filteredGallery = this.gallery.filter(g =>
-      g.event_name.toLowerCase().includes(text) ||
-      g.image_title.toLowerCase().includes(text)
+      g.event_name?.toLowerCase().includes(text) ||
+      g.image_title?.toLowerCase().includes(text)
     );
 
     this.currentPage = 1;
@@ -83,6 +151,7 @@ export class Gallery {
   }
 
   /* ================= PAGINATION ================= */
+
   updatePagination() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -100,31 +169,43 @@ export class Gallery {
   }
 
   /* ================= FILE ================= */
+
   onFileChange(event: any) {
     this.selectedFile = event.target.files[0];
   }
 
   /* ================= MODAL ================= */
+
   openAdd() {
     this.editId = null;
+
     this.galleryForm.reset({
-      school_id: '1',
-      branch_id: '1',
       status: 'active'
     });
+
+    this.filteredBranches = [];
+    this.selectedFile = undefined as any;
+
     this.showModal = true;
   }
 
   openEdit(gallery: any) {
     this.editId = gallery.id;
+
+    this.filteredBranches = this.branches.filter(
+      (b: any) => b.school_id == gallery.school_id
+    );
+
     this.galleryForm.patchValue(gallery);
     this.showModal = true;
   }
 
   /* ================= SAVE ================= */
+
   save() {
+
     if (this.galleryForm.invalid) {
-      this.notify.error('All required fields must be filled');
+      this.notify.error('Please fill all required fields');
       return;
     }
 
@@ -138,10 +219,11 @@ export class Gallery {
       formData.append('attachment', this.selectedFile);
     }
 
-    // 👇 IMPORTANT FOR LARAVEL
     if (this.editId) {
       formData.append('_method', 'PUT');
     }
+
+    this.loading = true;
 
     const request$ = this.editId
       ? this.service.updateGallery(this.editId, formData)
@@ -152,24 +234,25 @@ export class Gallery {
         if (res.success) {
           this.notify.success(this.editId ? 'Gallery updated' : 'Gallery created');
           this.showModal = false;
-          this.searchText = '';
-          this.selectedFile = undefined as any;
           this.loadGallery();
         } else {
           this.notify.error(res.message || 'Operation failed');
         }
+        this.loading = false;
       },
-      error: (err) => {
-        console.log(err);
+      error: () => {
         this.notify.error('Server error');
+        this.loading = false;
       }
     });
   }
 
-
   /* ================= DELETE ================= */
+
   delete(id: string) {
     if (!confirm('Delete this gallery record?')) return;
+
+    this.loading = true;
 
     this.service.deleteGallery(id).subscribe({
       next: (res: any) => {
@@ -179,8 +262,13 @@ export class Gallery {
         } else {
           this.notify.error('Delete failed');
         }
+        this.loading = false;
       },
-      error: () => this.notify.error('Server error')
+      error: () => {
+        this.notify.error('Server error');
+        this.loading = false;
+      }
     });
   }
+
 }

@@ -31,7 +31,7 @@ import { Exam } from "./exam/exam";
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Subjects, Notifications, FeeManagement],
+  imports: [HostelRooms, HostelAllocation, Gallery, SchoolCalender, TransportManagement, Medicalrecords, Modules],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
