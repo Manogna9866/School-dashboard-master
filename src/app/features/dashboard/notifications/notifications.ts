@@ -6,7 +6,7 @@ import { NotifyService } from '../../../core/services/notify';
 
 @Component({
   selector: 'app-notifications',
-  imports: [ReactiveFormsModule,FormsModule,CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './notifications.html',
   styleUrl: './notifications.scss',
 })
@@ -15,11 +15,15 @@ export class Notifications {
   filteredNotifications: any[] = [];
   paginatedNotifications: any[] = [];
 
+  schools: any[] = [];
+  branches: any[] = [];
+  classes: any[] = [];
+
   pages: number[] = [];
   currentPage = 1;
   pageSize = 5;
-
   searchText = '';
+
   showModal = false;
   editId: string | null = null;
   loading = false;
@@ -32,41 +36,40 @@ export class Notifications {
 
   ngOnInit() {
     this.notificationForm = this.fb.group({
-
-      
-
       school_id: ['', Validators.required],
       branch_id: ['', Validators.required],
       class_id: [''],
-
       title: ['', Validators.required],
       message: ['', Validators.required],
-
       date_time: ['', Validators.required],
-
       recipient_type: ['', Validators.required],
       type: ['', Validators.required],
-
       status: ['', Validators.required],
-      last_accessed_by: ['', Validators.required],
-
-     
     });
 
+
+    this.loadSchools();
+    this.loadClasses();
     this.loadNotifications();
+
+    // Load branches dynamically when school changes
+    this.notificationForm.get('school_id')?.valueChanges.subscribe(schoolId => {
+      if (schoolId) {
+        this.loadBranchesBySchool(schoolId);
+      } else {
+        this.branches = [];
+        this.notificationForm.patchValue({ branch_id: '' });
+      }
+    });
   }
 
-  /* ================= LOAD ================= */
+  /** ================= LOAD DATA ================= */
   loadNotifications() {
     this.loading = true;
-
     this.service.getnotifications().subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.notifications = Array.isArray(res.data)
-            ? res.data
-            : res.data?.data || [];
-
+          this.notifications = Array.isArray(res.data?.data) ? res.data.data : [];
           this.applyFilter();
         } else {
           this.notify.error('Failed to load notifications');
@@ -80,25 +83,29 @@ export class Notifications {
     });
   }
 
-  /* ================= SEARCH ================= */
+  loadSchools() { this.service.getSchools().subscribe((res: any) => { this.schools = res.data?.data || []; }); }
+  loadBranchesBySchool(schoolId: number) {
+    this.service.getBranches().subscribe((res: any) => {
+      this.branches = (res.data?.data || []).filter((b: any) => b.school_id == schoolId);
+    });
+  }
+  loadClasses() { this.service.getClasses().subscribe((res: any) => { this.classes = res.data?.data || []; }); }
+
+  /** ================= SEARCH & PAGINATION ================= */
   applyFilter() {
     const text = this.searchText.toLowerCase();
-
     this.filteredNotifications = this.notifications.filter(n =>
       (n.title || '').toLowerCase().includes(text) ||
       (n.message || '').toLowerCase().includes(text) ||
       (n.type || '').toLowerCase().includes(text)
     );
-
     this.currentPage = 1;
     this.updatePagination();
   }
 
-  /* ================= PAGINATION ================= */
   updatePagination() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
-
     this.paginatedNotifications = this.filteredNotifications.slice(start, end);
 
     const totalPages = Math.ceil(this.filteredNotifications.length / this.pageSize);
@@ -111,95 +118,78 @@ export class Notifications {
     this.updatePagination();
   }
 
-  /* ================= MODAL ================= */
+  /** ================= MODAL ================= */
   openAdd() {
     this.editId = null;
+    this.branches = [];
     this.notificationForm.reset();
     this.showModal = true;
   }
 
   openEdit(notification: any) {
     this.editId = notification.id;
-
+    this.loadBranchesBySchool(notification.school_id);
     this.notificationForm.patchValue({
       ...notification,
-      date_time: this.formatDateForInput(notification.date_time),
-      created_at: this.formatDateForInput(notification.created_at),
-      updated_at: this.formatDateForInput(notification.updated_at),
-      deleted_at: this.formatDateForInput(notification.deleted_at)
+      date_time: this.formatDateForInput(notification.date_time)
     });
-
     this.showModal = true;
   }
 
-  /* ================= SAVE ================= */
+  /** ================= SAVE ================= */
   save() {
-    if (this.notificationForm.invalid) {
-      this.notificationForm.markAllAsTouched();
-      this.notify.error('All fields are required');
-      return;
+  if (this.notificationForm.invalid) {
+    this.notificationForm.markAllAsTouched();
+    console.log("Form Errors:", this.notificationForm.errors);
+    console.log("Form Value:", this.notificationForm.value);
+    return;
+  }
+
+  const raw = this.notificationForm.value;
+
+  const payload = {
+    school_id: +raw.school_id,
+    branch_id: +raw.branch_id,
+    class_id: raw.class_id ? +raw.class_id : null,
+    title: raw.title,
+    message: raw.message,
+    date_time: raw.date_time
+      ? raw.date_time.replace('T', ' ') + ':00'
+      : null,
+    recipient_type: raw.recipient_type,
+    type: raw.type,
+    status: raw.status
+  };
+
+  console.log("Sending Payload:", payload);
+
+  this.service.createnotification(payload).subscribe({
+    next: (res: any) => {
+      console.log("API Response:", res);
+      this.notify.success("Notification created");
+      this.showModal = false;
+      this.loadNotifications();
+    },
+    error: (err) => {
+      console.log("API Error:", err);
+      console.log("Error Response:", err.error);
+      this.notify.error(err.error?.message || "Server Error");
     }
+  });
+}
 
-    this.loading = true;
 
-    const raw = this.notificationForm.getRawValue();
 
-    const payload = {
-      ...raw,
-      date_time: this.formatDateForApi(raw.date_time),
-      created_at: this.formatDateForApi(raw.created_at),
-      updated_at: this.formatDateForApi(raw.updated_at),
-      deleted_at: raw.deleted_at
-        ? this.formatDateForApi(raw.deleted_at)
-        : null
-    };
-
-    const request$ = this.editId
-      ? this.service.updatenotification(this.editId, payload)
-      : this.service.createnotification(payload);
-
-    request$.subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.notify.success(this.editId ? 'Notification updated' : 'Notification created');
-          this.showModal = false;
-          this.searchText = '';
-          this.loadNotifications();
-        } else {
-          this.notify.error(res.message || 'Operation failed');
-        }
-        this.loading = false;
-      },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
-    });
-  }
-
-  /* ================= DELETE ================= */
-  delete(id: string) {
+  /** ================= DELETE ================= */
+  deleteNotification(id: string) {
     if (!confirm('Delete this notification?')) return;
-
-    this.loading = true;
-    this.service.deletenotification(id).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.notify.success('Notification deleted');
-          this.loadNotifications();
-        } else {
-          this.notify.error('Delete failed');
-        }
-        this.loading = false;
-      },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+    this.service.deletenotification(id).subscribe((res: any) => {
+      if (res.success) this.notify.success('Notification deleted');
+      this.loadNotifications();
     });
   }
 
-  /* ================= DATE HELPERS ================= */
+  /** ================= DATE HELPERS ================= */
   private formatDateForInput(date: string): string {
     if (!date) return '';
     return date.replace(' ', 'T').substring(0, 16);

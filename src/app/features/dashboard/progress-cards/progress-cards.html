@@ -126,10 +126,6 @@
           <option *ngFor="let c of exams" [value]="c.id">{{ c.exam_name }}</option>
         </select>
       </div>
-      <div>
-        <label>Percentage</label>
-        <input formControlName="percentage" />
-      </div>
 
       <div>
         <label>Total Marks</label>
@@ -169,19 +165,20 @@
         <label>Overall Remarks</label>
         <textarea formControlName="overall_remarks"></textarea>
       </div>
+      <!-- Teacher Signature -->
       <div>
         <label>Teacher Signature</label>
         <input type="file" (change)="onFileChange($event, 'teacher')" />
-        <img *ngIf="progressCardForm.value.teacher_signature" [src]="progressCardForm.value.teacher_signature"
-          class="signature-preview" />
+        <img *ngIf="teacherPreview" [src]="teacherPreview" class="signature-preview" />
       </div>
 
+      <!-- Principal Signature -->
       <div>
         <label>Principal Signature</label>
         <input type="file" (change)="onFileChange($event, 'principal')" />
-        <img *ngIf="progressCardForm.value.principal_signature" [src]="progressCardForm.value.principal_signature"
-          class="signature-preview" />
+        <img *ngIf="principalPreview" [src]="principalPreview" class="signature-preview" />
       </div>
+
 
     </form>
 

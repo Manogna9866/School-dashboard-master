@@ -5,11 +5,7 @@
     <h2>Fee Management</h2>
 
     <div class="header-actions">
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search fees..."
-        [(ngModel)]="searchText"
+      <input class="search-input" type="text" placeholder="Search fees..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Fee</button>
@@ -57,14 +53,11 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)">Prev</button>
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-      [disabled]="currentPage === pages.length || pages.length === 0"
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
       (click)="changePage(currentPage + 1)">Next</button>
   </div>
 </div>
@@ -74,21 +67,45 @@
     <h3>{{ editId ? 'Edit Fee' : 'Add Fee' }}</h3>
 
     <form [formGroup]="feeForm" class="school-form">
+      <div>
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">
+            {{ s.school_name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label>Branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of filteredBranches" [value]="b.id">
+            {{ b.branch_name }}
+          </option>
+        </select>
+      </div>
+      <select formControlName="class_id">
+        <option value="">Select Class</option>
+        <option *ngFor="let c of filteredClasses" [value]="c.id">
+          {{ c.class_name }}
+        </option>
+      </select>
+
+      <select formControlName="student_id">
+        <option value="">Select Student</option>
+        <option *ngFor="let s of students" [value]="s.id">
+          {{ s.first_name }} {{ s.last_name }}
+        </option>
+      </select>
+
 
       <div>
         <label>Academic Year</label>
         <input formControlName="academic_year" />
       </div>
 
-      <div>
-        <label>Class ID</label>
-        <input formControlName="class_id" />
-      </div>
 
-      <div>
-        <label>Student ID</label>
-        <input formControlName="student_id" />
-      </div>
 
       <div>
         <label>Fee Type</label>

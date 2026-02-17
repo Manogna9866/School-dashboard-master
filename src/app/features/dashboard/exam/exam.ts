@@ -11,7 +11,7 @@ import { NotifyService } from '../../../core/services/notify';
   styleUrl: './exam.scss',
 })
 export class Exam {
-exams: any[] = [];
+ exams: any[] = [];
   filteredExams: any[] = [];
   paginatedExams: any[] = [];
 

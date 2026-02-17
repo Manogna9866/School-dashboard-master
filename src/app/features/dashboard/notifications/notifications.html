@@ -5,11 +5,7 @@
     <h2>Notifications</h2>
 
     <div class="header-actions">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search notifications..."
-        [(ngModel)]="searchText"
+      <input type="text" class="search-input" placeholder="Search notifications..." [(ngModel)]="searchText"
         (input)="applyFilter()" />
 
       <button class="btn primary" (click)="openAdd()">+ Add Notification</button>
@@ -45,7 +41,7 @@
           </td>
           <td class="actions-col">
             <button class="btn outline" (click)="openEdit(n)">Edit</button>
-            <button class="btn danger" (click)="delete(n.id)">Delete</button>
+            <button class="btn danger" (click)="deleteNotification(n.id)">Delete</button>
           </td>
         </tr>
 
@@ -58,17 +54,14 @@
 
   <!-- PAGINATION -->
   <div class="pagination">
-    <button class="btn outline"
-            [disabled]="currentPage === 1"
-            (click)="changePage(currentPage - 1)">
+    <button class="btn outline" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
       Prev
     </button>
 
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
 
-    <button class="btn outline"
-            [disabled]="currentPage === pages.length || pages.length === 0"
-            (click)="changePage(currentPage + 1)">
+    <button class="btn outline" [disabled]="currentPage === pages.length || pages.length === 0"
+      (click)="changePage(currentPage + 1)">
       Next
     </button>
   </div>
@@ -80,23 +73,31 @@
 
     <h3>{{ editId ? 'Edit Notification' : 'Add Notification' }}</h3>
 
+
     <form [formGroup]="notificationForm" class="school-form">
 
-     
-
       <div>
-        <label>School ID</label>
-        <input formControlName="school_id" />
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [ngValue]="s.id">{{ s.school_name }}</option>
+        </select>
       </div>
 
       <div>
-        <label>Branch ID</label>
-        <input formControlName="branch_id" />
+        <label>Branch</label>
+        <select formControlName="branch_id">
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of branches" [ngValue]="b.id">{{ b.branch_name }}</option>
+        </select>
       </div>
 
       <div>
-        <label>Class ID</label>
-        <input formControlName="class_id" />
+        <label>Class</label>
+        <select formControlName="class_id">
+          <option value="">Select Class</option>
+          <option *ngFor="let c of classes" [ngValue]="c.id">{{ c.class_name }}</option>
+        </select>
       </div>
 
       <div>
@@ -143,8 +144,6 @@
         </select>
       </div>
 
-     
-
     </form>
 
     <div class="actions">
@@ -154,5 +153,3 @@
 
   </div>
 </div>
-
-

@@ -12,28 +12,30 @@ import { NotifyService } from '../../../core/services/notify';
   styleUrl: './progress-cards.scss',
 })
 export class ProgressCards {
-  schools: any[] = [];
-  branches: any[] = [];
-  classes: any[] = [];
-  students: any[] = [];
-  exams: any[] = [];
-
-  // Progress cards
   progressCards: any[] = [];
   filteredProgressCards: any[] = [];
   paginatedProgressCards: any[] = [];
 
-  // Pagination
+  schools: any[] = [];
+  branches: any[] = [];
+  classes: any[] = [];
+  exams: any[] = [];
+  students: any[] = [];
+
   pages: number[] = [];
   currentPage = 1;
   pageSize = 5;
   searchText = '';
 
-  // Modal & Form
   showModal = false;
   editId: string | null = null;
   loading = false;
+
   progressCardForm!: FormGroup;
+
+  // Image previews
+  teacherPreview: string | null = null;
+  principalPreview: string | null = null;
 
   private service = inject(AuthService);
   private fb = inject(FormBuilder);
@@ -41,45 +43,51 @@ export class ProgressCards {
 
   ngOnInit() {
     this.initForm();
-    this.loadMasterData();
+    this.loadSchools();
+    this.loadBranches();
+    this.loadClasses();
+    this.loadStudents();
     this.loadProgressCards();
 
-    // Auto calculate percentage
-    this.progressCardForm.valueChanges.subscribe(() => this.calculatePercentage());
-
-    // Cascading dropdowns
+    // Cascading selects
     this.progressCardForm.get('school_id')?.valueChanges.subscribe((schoolId: string) => {
-      this.progressCardForm.patchValue({ branch_id: '', class_id: '', exam_id: '', student_id: '' }, { emitEvent: false });
+      this.progressCardForm.patchValue(
+        { branch_id: '', class_id: '', exam_id: '', student_id: '' },
+        { emitEvent: false }
+      );
+      this.branches = schoolId ? [] : [];
+      this.students = [];
+      this.exams = [];
       if (schoolId) {
         this.loadBranchesBySchool(schoolId);
         this.loadStudentsBySchool(schoolId);
-      } else {
-        this.branches = [];
-        this.students = [];
       }
     });
 
     this.progressCardForm.get('branch_id')?.valueChanges.subscribe((branchId: string) => {
       this.progressCardForm.patchValue({ exam_id: '', student_id: '' }, { emitEvent: false });
-      if (branchId) this.loadExamsByBranch(branchId);
-      else this.exams = [];
+      this.exams = [];
+      if (branchId) {
+        this.loadExamsByBranch(branchId);
+        this.loadStudentsByBranch(branchId);
+      }
     });
 
     this.progressCardForm.get('class_id')?.valueChanges.subscribe((classId: string) => {
       this.progressCardForm.patchValue({ student_id: '' }, { emitEvent: false });
       if (classId) this.loadStudentsByClass(classId);
-      else this.students = [];
     });
 
     this.progressCardForm.get('exam_id')?.valueChanges.subscribe((examId: string) => {
       this.progressCardForm.patchValue({ student_id: '' }, { emitEvent: false });
       if (examId) this.loadStudentsByExam(examId);
-      else this.students = [];
     });
+
+    // Auto-calculate percentage
+    this.progressCardForm.valueChanges.subscribe(() => this.calculatePercentage());
   }
 
-  // ------------------ FORM ------------------
-  private initForm() {
+  initForm() {
     this.progressCardForm = this.fb.group({
       school_id: ['', Validators.required],
       branch_id: ['', Validators.required],
@@ -88,102 +96,56 @@ export class ProgressCards {
       student_id: ['', Validators.required],
       total_marks: ['', Validators.required],
       obtained_marks: ['', Validators.required],
-      percentage: [''],
+      percentage: [{ value: '', disabled: true }],
       rank: ['', Validators.required],
       grade: ['', Validators.required],
       result_status: ['', Validators.required],
       overall_remarks: [''],
-      teacher_signature: [''],
-      principal_signature: [''],
+      teacher_signature: [null],
+      principal_signature: [null],
     });
-    
   }
 
-  // ------------------ MASTER DATA ------------------
-  private loadMasterData() {
-    this.loadSchools();
-    this.loadBranches();
-    this.loadClasses();
-   
-    this.loadStudents();
-    this.progressCardForm.get('branch_id')?.valueChanges.subscribe((branchId) => {
-      if (branchId) {
-        this.loadExamsByBranch(branchId);
-        this.progressCardForm.patchValue({ exam_id: '' }, { emitEvent: false });
-      } else {
-        this.exams = [];
-      }
-    });
-    
-  }
-
-  loadSchools() {
-    this.service.getSchools().subscribe(res => this.schools = res?.success ? res.data?.data || [] : []);
-  }
-
-  loadBranches() {
-    this.service.getBranches().subscribe(res => this.branches = res?.success ? res.data?.data || [] : []);
-  }
-
-  
-
-  loadClasses() {
-    this.service.getClasses().subscribe(res => this.classes = res?.success ? res.data?.data || [] : []);
-  }
-
+  // ------------------- LOAD DATA -------------------
+  loadSchools() { this.service.getSchools().subscribe((res: any) => (this.schools = res?.success ? res.data?.data || [] : [])); }
+  loadBranches() { this.service.getBranches().subscribe((res: any) => (this.branches = res?.success ? res.data?.data || [] : [])); }
+  loadClasses() { this.service.getClasses().subscribe((res: any) => (this.classes = res?.success ? res.data?.data || [] : [])); }
   loadExamsByBranch(branchId: string) {
-    this.service.getExams().subscribe({
-      next: (res: any) => {
-        this.exams = (res.data?.data || []).filter((e: any) => Number(e.branch_id) === Number(branchId));
-      },
-      error: () => {
-        this.exams = [];
-        this.notify.error('Failed to load exams');
-      }
+    this.service.getExams().subscribe((res: any) => {
+      this.exams = (res.data?.data || []).filter((e: any) => e.branch_id == branchId);
     });
   }
-
-  
- loadBranchesBySchool(schoolId: number) {
+  loadBranchesBySchool(schoolId: string) {
     this.service.getBranches().subscribe((res: any) => {
       this.branches = (res.data?.data || []).filter((b: any) => b.school_id == schoolId);
     });
   }
-
-  loadStudents() {
-    this.service.getstudents().subscribe(res => this.students = res?.success ? res.data?.data || [] : []);
-  }
-
+  loadStudents() { this.service.getstudents().subscribe((res: any) => (this.students = res?.success ? res.data?.data || [] : [])); }
   loadStudentsBySchool(schoolId: string) {
-    const sId = Number(schoolId);
-    this.service.getstudents().subscribe(res => {
-      const allStudents = res?.success ? res.data?.data || [] : [];
-      this.students = allStudents.filter((s: any) => Number(s.school_id) === sId);
+    this.service.getstudents().subscribe((res: any) => {
+      const all = res?.success ? res.data?.data || [] : [];
+      this.students = all.filter((s: any) => s.school_id == schoolId);
     });
   }
-
+  loadStudentsByBranch(branchId: string) {
+    this.service.getstudents().subscribe((res: any) => {
+      const all = res?.success ? res.data?.data || [] : [];
+      this.students = all.filter((s: any) => s.branch_id == branchId);
+    });
+  }
   loadStudentsByClass(classId: string) {
-    const cId = Number(classId);
-    this.service.getstudents().subscribe(res => {
-      const allStudents = res?.success ? res.data?.data || [] : [];
-      this.students = allStudents.filter((s: any) => Number(s.class_id) === cId);
+    this.service.getstudents().subscribe((res: any) => {
+      const all = res?.success ? res.data?.data || [] : [];
+      this.students = all.filter((s: any) => s.class_id == classId);
+    });
+  }
+  loadStudentsByExam(examId: string) {
+    this.service.getstudents().subscribe((res: any) => {
+      const all = res?.success ? res.data?.data || [] : [];
+      this.students = all.filter((s: any) => s.exam_id == examId);
     });
   }
 
- 
-  loadExamsByBranch(branchId: string) {
-    this.service.getExams().subscribe({
-      next: (res: any) => {
-        this.exams = (res.data?.data || []).filter((e: any) => Number(e.branch_id) === Number(branchId));
-      },
-      error: () => {
-        this.exams = [];
-        this.notify.error('Failed to load exams');
-      }
-    });
-  }
-
-  // ------------------ PROGRESS CARDS ------------------
   loadProgressCards() {
     this.loading = true;
     this.service.getprogresscards().subscribe({
@@ -195,17 +157,17 @@ export class ProgressCards {
       error: () => {
         this.notify.error('Server error');
         this.loading = false;
-      }
+      },
     });
   }
 
-  // ------------------ SEARCH & PAGINATION ------------------
+  // ------------------- SEARCH & PAGINATION -------------------
   applyFilter() {
     const text = this.searchText.toLowerCase();
-    this.filteredProgressCards = this.progressCards.filter(p =>
-      p.student_id.toString().includes(text) ||
-      p.exam_id.toString().includes(text) ||
-      p.class_id.toString().includes(text) ||
+    this.filteredProgressCards = this.progressCards.filter((p: any) =>
+      (p.student_id || '').toString().includes(text) ||
+      (p.exam_id || '').toString().includes(text) ||
+      (p.class_id || '').toString().includes(text) ||
       (p.grade || '').toLowerCase().includes(text) ||
       (p.result_status || '').toLowerCase().includes(text)
     );
@@ -226,39 +188,56 @@ export class ProgressCards {
     this.updatePagination();
   }
 
-  // ------------------ MODAL ------------------
+  // ------------------- MODAL -------------------
   openAdd() {
     this.editId = null;
-    this.progressCardForm.reset({
-      school_id: '', branch_id: '', class_id: '', exam_id: '', student_id: '', teacher_signature: '', principal_signature: ''
-    });
+    this.progressCardForm.reset();
+    this.teacherPreview = null;
+    this.principalPreview = null;
     this.showModal = true;
   }
 
   openEdit(card: any) {
     this.editId = card.id;
+    this.showModal = true;
+    this.teacherPreview = card.teacher_signature ? 'https://s2swebsolutions.in/S2SWebSchool/public/' + card.teacher_signature : null;
+    this.principalPreview = card.principal_signature ? 'https://s2swebsolutions.in/S2SWebSchool/public/' + card.principal_signature : null;
+
     this.loadBranchesBySchool(card.school_id);
     this.loadExamsByBranch(card.branch_id);
-    this.loadStudentsByExam(card.exam_id);
-    this.progressCardForm.patchValue({
-      ...card,
-      teacher_signature: card.teacher_signature || '',
-      principal_signature: card.principal_signature || ''
-    });
-    this.showModal = true;
+    this.loadStudentsBySchool(card.school_id);
+
+    setTimeout(() => {
+      this.progressCardForm.patchValue({
+        school_id: card.school_id || '',
+        branch_id: card.branch_id || '',
+        class_id: card.class_id || '',
+        exam_id: card.exam_id || '',
+        student_id: card.student_id || '',
+        total_marks: card.total_marks ? Number(card.total_marks) : '',
+        obtained_marks: card.obtained_marks ? Number(card.obtained_marks) : '',
+        percentage: card.percentage ? Number(card.percentage) : '',
+        rank: card.rank ? Number(card.rank) : '',
+        grade: card.grade || '',
+        result_status: card.result_status || '',
+        overall_remarks: card.overall_remarks || '',
+        teacher_signature: null,
+        principal_signature: null,
+      });
+    }, 100);
   }
 
-  // ------------------ CALCULATION ------------------
+  // ------------------- CALCULATE PERCENTAGE -------------------
   calculatePercentage() {
-    const total = this.progressCardForm.value.total_marks;
-    const obtained = this.progressCardForm.value.obtained_marks;
+    const total = Number(this.progressCardForm.value.total_marks);
+    const obtained = Number(this.progressCardForm.value.obtained_marks);
     if (total && obtained) {
       const percentage = ((obtained / total) * 100).toFixed(2);
       this.progressCardForm.patchValue({ percentage }, { emitEvent: false });
     }
   }
 
-  // ------------------ SAVE ------------------
+  // ------------------- SAVE -------------------
   save() {
     if (this.progressCardForm.invalid) {
       this.notify.error('All required fields are required');
@@ -266,57 +245,69 @@ export class ProgressCards {
     }
 
     this.loading = true;
+    const formValue = this.progressCardForm.getRawValue();
+    const payload = new FormData();
+
+    payload.append('school_id', formValue.school_id);
+    payload.append('branch_id', formValue.branch_id);
+    payload.append('class_id', formValue.class_id);
+    payload.append('exam_id', formValue.exam_id);
+    payload.append('student_id', formValue.student_id);
+    payload.append('total_marks', formValue.total_marks.toString());
+    payload.append('obtained_marks', formValue.obtained_marks.toString());
+    payload.append('percentage', formValue.percentage.toString());
+    payload.append('rank', formValue.rank.toString());
+    payload.append('grade', formValue.grade);
+    payload.append('result_status', formValue.result_status);
+    payload.append('overall_remarks', formValue.overall_remarks || '');
+
+    // Append files if uploaded
+    if (formValue.teacher_signature instanceof File) payload.append('teacher_signature', formValue.teacher_signature);
+    if (formValue.principal_signature instanceof File) payload.append('principal_signature', formValue.principal_signature);
+
     const request$ = this.editId
-      ? this.service.updateprogresscard(this.editId, this.progressCardForm.value)
-      : this.service.createprogresscard(this.progressCardForm.value);
+      ? this.service.updateprogresscard(this.editId, payload)
+      : this.service.createprogresscard(payload);
 
     request$.subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.notify.success(res.message || 'Progress card saved successfully');
+          this.notify.success(res.message || 'Progress card saved');
           this.showModal = false;
-          this.progressCardForm.reset({
-            school_id: '', branch_id: '', class_id: '', exam_id: '', student_id: '', teacher_signature: '', principal_signature: ''
-          });
           this.loadProgressCards();
-        } else {
-          this.notify.error(res.message || 'Operation failed');
-        }
+        } else this.notify.error(res.message || 'Operation failed');
         this.loading = false;
       },
       error: () => {
         this.notify.error('Server error');
         this.loading = false;
-      }
+      },
     });
   }
 
-  // ------------------ DELETE ------------------
+  // ------------------- DELETE -------------------
   delete(id: string) {
     if (!confirm('Delete this progress card?')) return;
-    this.loading = true;
     this.service.deleteprogresscard(id).subscribe({
       next: (res: any) => {
         if (res.success) this.notify.success('Progress card deleted');
         this.loadProgressCards();
-        this.loading = false;
       },
-      error: () => {
-        this.notify.error('Server error');
-        this.loading = false;
-      }
+      error: () => this.notify.error('Server error'),
     });
   }
 
-  // ------------------ FILE UPLOAD ------------------
+  // ------------------- FILE UPLOAD -------------------
   onFileChange(event: any, type: 'teacher' | 'principal') {
     const file = event.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (type === 'teacher') this.progressCardForm.patchValue({ teacher_signature: reader.result });
-      if (type === 'principal') this.progressCardForm.patchValue({ principal_signature: reader.result });
-    };
-    reader.readAsDataURL(file);
+    if (type === 'teacher') {
+      this.progressCardForm.patchValue({ teacher_signature: file });
+      this.teacherPreview = URL.createObjectURL(file);
+    }
+    if (type === 'principal') {
+      this.progressCardForm.patchValue({ principal_signature: file });
+      this.principalPreview = URL.createObjectURL(file);
+    }
   }
 }
