@@ -1,19 +1,14 @@
 <div class="card">
-
-  <!-- HEADER -->
   <div class="header">
     <h2>Cultural Activities</h2>
     <div class="header-actions">
-      <input type="text" class="search-input" placeholder="Search..." [(ngModel)]="searchText"
-        (input)="applyFilter()" />
+      <input type="text" placeholder="Search..." [(ngModel)]="searchText" (input)="applyFilter()" />
       <button class="btn primary" (click)="openAdd()">+ New Activity</button>
     </div>
   </div>
 
-  <!-- LOADING -->
   <div class="state" *ngIf="loading">Loading...</div>
 
-  <!-- TABLE -->
   <div class="table-wrapper" *ngIf="!loading && activities.length">
     <table>
       <thead>
@@ -23,8 +18,8 @@
           <th>Date & Time</th>
           <th>Venue</th>
           <th>Status</th>
-          <th>images</th>
-          <th width="140">Actions</th>
+          <th>Attachment</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -36,9 +31,10 @@
           <td>
             <span class="status" [class.active]="a.status === 'ongoing'">{{ a.status }}</span>
           </td>
-          <td> <img *ngIf="a.attachment" [src]="'https://s2swebsolutions.in/S2SWebSchool/public/api/v1/' + a.attachment"
-              width="60" height="50" style="border-radius: 5px;" alt="{{a.media_type}}"
-              title="{{a.attachment}}" /></td>
+          <td>
+            <img *ngIf="a.attachment" [src]="'https://s2swebsolutions.in/S2SWebSchool/public/' + a.attachment"
+                 width="60" height="50" style="border-radius: 5px;" alt="{{a.attachment_type}}" />
+          </td>
           <td>
             <button class="btn outline" (click)="openEdit(a)">Edit</button>
             <button class="btn danger" (click)="delete(a.id)">Delete</button>
@@ -50,12 +46,10 @@
 
   <div class="state" *ngIf="!loading && !activities.length">No activities found</div>
 
-  <!-- PAGINATION -->
   <div class="pagination" *ngIf="pages.length > 1">
     <button class="btn outline" [disabled]="currentPage===1" (click)="changePage(currentPage-1)">Prev</button>
     <span>Page {{ currentPage }} of {{ pages.length }}</span>
-    <button class="btn outline" [disabled]="currentPage===pages.length"
-      (click)="changePage(currentPage+1)">Next</button>
+    <button class="btn outline" [disabled]="currentPage===pages.length" (click)="changePage(currentPage+1)">Next</button>
   </div>
 </div>
 
@@ -63,33 +57,34 @@
 <div class="modal" *ngIf="showModal">
   <div class="modal-content">
     <h3>{{ editId ? 'Edit Activity' : 'Add Activity' }}</h3>
-    <form [formGroup]="culturalForm" class="form-grid">
+    <form [formGroup]="activityForm" class="form-grid">
+      <div>
+        <label>School</label>
+        <select formControlName="school_id">
+          <option value="">Select School</option>
+          <option *ngFor="let s of schools" [value]="s.id">{{ s.school_name }}</option>
+        </select>
+      </div>
 
       <div>
         <label>Branch</label>
         <select formControlName="branch_id">
-          <option *ngFor="let b of branches || []" [value]="b.id">
-            {{ b.branch_name }}
-          </option>
-
-
+          <option value="">Select Branch</option>
+          <option *ngFor="let b of filteredBranches" [value]="b.id">{{ b.branch_name }}</option>
         </select>
       </div>
 
       <div>
         <label>Class</label>
         <select formControlName="class_id">
-          <option *ngFor="let c of classes || []" [value]="c.id">
-            {{ c.class_name }}
-          </option>
-
+          <option value="">Select Class</option>
+          <option *ngFor="let c of classes" [value]="c.id">{{ c.class_name }}</option>
         </select>
       </div>
 
       <div>
         <label>Coordinator</label>
-        <input formControlName="coordinator_name">
-
+        <input formControlName="coordinator_name" />
       </div>
 
       <div>
@@ -133,11 +128,9 @@
 
       <div>
         <label>Attachment (Image/Video)</label>
-        <input type="file" accept="image/*,video/*,.pdf,.doc,.docx" (change)="onFileSelected($event)" required />
+        <input type="file" accept="image/*,video/*,.pdf,.doc,.docx" (change)="onFileSelected($event)" />
       </div>
-
     </form>
-
 
     <div class="actions">
       <button class="btn outline" (click)="showModal=false">Cancel</button>

@@ -27,11 +27,12 @@ import { Gallery } from "./gallery/gallery";
 import { SchoolCalender } from "./school-calender/school-calender";
 import { Modules } from "./modules/modules";
 import { Exam } from "./exam/exam";
+import { ModulePermissions } from "./module-permissions/module-permissions";
 
 
 @Component({
   selector: 'app-dashboard',
-  imports: [HostelRooms, HostelAllocation, Gallery, SchoolCalender, TransportManagement, Medicalrecords, Modules],
+  imports: [Students, FacultyLeave, Culturalactivities, ModulePermissions, Modules],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

@@ -8,110 +8,100 @@ import { NotifyService } from '../../../core/services/notify';
   selector: 'app-culturalactivities',
   imports: [FormsModule, CommonModule, ReactiveFormsModule],
   templateUrl: './culturalactivities.html',
-  styleUrl: './culturalactivities.scss',
+  styleUrls: ['./culturalactivities.scss'],
+
 })
 export class Culturalactivities {
+  schools: any[] = [];
+  branches: any[] = [];
+  classes: any[] = [];
+  filteredBranches: any[] = [];
+
   activities: any[] = [];
   filteredActivities: any[] = [];
   paginatedActivities: any[] = [];
 
-  branches: any[] = [];
-  classes: any[] = [];
-  faculty: any[] = [];
+  file: File | null = null;
 
-  culturalForm!: FormGroup;
-  selectedFile: File | null = null;
-
+  pages: number[] = [];
+  currentPage = 1;
+  pageSize = 5;
   searchText = '';
   showModal = false;
   editId: string | null = null;
   loading = false;
 
-  currentPage = 1;
-  pageSize = 5;
-  pages: number[] = [];
+  activityForm!: FormGroup;
 
   private fb = inject(FormBuilder);
-  private service = inject(AuthService);
   private notify = inject(NotifyService);
+  private service = inject(AuthService);
 
-  ngOnInit(): void {
-    this.initForm();
-    this.loadActivities();
-    this.loadBranches();
-    this.loadClasses();
-   
-  }
-
-  initForm() {
-    this.culturalForm = this.fb.group({
-      school_id: ['1', Validators.required],
+  ngOnInit() {
+    this.activityForm = this.fb.group({
+      school_id: ['', Validators.required],
       branch_id: ['', Validators.required],
       class_id: ['', Validators.required],
       event_name: ['', Validators.required],
-      category: ['', Validators.required],
       date_time: ['', Validators.required],
       venue: ['', Validators.required],
-      status: ['upcoming', Validators.required],
-      description: [''],
+      category: ['', Validators.required],
       awards_recognitions: [''],
-      coordinator_name: [''],
+      description: [''],
+      coordinator_name: ['', Validators.required],
+      status: ['upcoming'],
       attachment_type: ['image']
     });
-  }
 
-  // ===== FILE =====
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
+    this.loadSchools();
+    this.loadBranches();
+    this.loadClasses();
+    this.loadActivities();
 
-    const file = input.files[0];
-    this.selectedFile = file;
-
-    this.culturalForm.patchValue({
-      attachment_type: file.type.startsWith('image') ? 'image' : 'video'
+    // Filter branches when school changes
+    this.activityForm.get('school_id')?.valueChanges.subscribe(schoolId => {
+      this.filteredBranches = this.branches.filter(b => b.school_id == schoolId);
+      this.activityForm.patchValue({ branch_id: '' });
     });
   }
 
-  // ===== LOADERS =====
-  loadActivities() {
-    this.loading = true;
-    this.service.getculturalactivities().subscribe({
-      next: (res: any) => {
-        this.activities = res?.data?.data ?? [];
-        this.applyFilter();
-        this.loading = false;
-      },
-      error: () => this.loading = false
+  loadSchools() {
+    this.service.getSchools().subscribe({
+      next: (res: any) => this.schools = res.success && res.data?.data ? res.data.data : [],
+      error: () => this.notify.error('Failed to load schools')
     });
   }
 
   loadBranches() {
-    this.service.getBranches().subscribe((res: any) => {
-      const data = res?.data?.data;
-      this.branches = Array.isArray(data) ? data : [];
+    this.service.getBranches().subscribe({
+      next: (res: any) => this.branches = res.success && res.data?.data ? res.data.data : [],
+      error: () => this.notify.error('Failed to load branches')
     });
   }
-
 
   loadClasses() {
-    this.service.getClasses().subscribe((res: any) => {
-      const data = res?.data?.data;
-      this.classes = Array.isArray(data) ? data : [];
+    this.service.getClasses().subscribe({
+      next: (res: any) => this.classes = res.success && res.data?.data ? res.data.data : [],
+      error: () => this.notify.error('Failed to load classes')
     });
   }
 
+  loadActivities() {
+    this.service.getculturalactivities().subscribe({
+      next: (res: any) => {
+        this.activities = res.success && res.data?.data ? res.data.data : [];
+        this.applyFilter();
+      },
+      error: () => this.notify.error('Server error')
+    });
+  }
 
- 
-
-
-  // ===== FILTER + PAGINATION =====
   applyFilter() {
     const text = this.searchText.toLowerCase();
     this.filteredActivities = this.activities.filter(a =>
       a.event_name?.toLowerCase().includes(text) ||
       a.category?.toLowerCase().includes(text) ||
-      a.status?.toLowerCase().includes(text)
+      a.coordinator_name?.toLowerCase().includes(text)
     );
     this.currentPage = 1;
     this.updatePagination();
@@ -120,85 +110,139 @@ export class Culturalactivities {
   updatePagination() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
-
     this.paginatedActivities = this.filteredActivities.slice(start, end);
     const totalPages = Math.ceil(this.filteredActivities.length / this.pageSize);
     this.pages = Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 
   changePage(page: number) {
+    if (page < 1 || page > this.pages.length) return;
     this.currentPage = page;
     this.updatePagination();
   }
 
-  // ===== MODAL =====
   openAdd() {
     this.editId = null;
-    this.selectedFile = null;
+    this.file = null;
+    this.activityForm.reset({ status: 'upcoming', attachment_type: 'image' });
+    this.filteredBranches = [];
+    this.showModal = true;
+  }
 
-    this.culturalForm.reset({
-      school_id: '1',
-      status: 'upcoming',
-      attachment_type: 'image'
+  openEdit(item: any) {
+
+    // ✅ Set edit id
+    this.editId = item.id;
+
+    // ✅ Filter branches
+    this.filteredBranches =
+      this.branches.filter(b => b.school_id == item.school_id);
+
+    // ✅ Convert API date → input format
+    const formattedDate = item.date_time
+      ? new Date(item.date_time.replace(' ', 'T'))
+        .toISOString()
+        .slice(0, 16)
+      : '';
+
+    // ✅ Patch form
+    this.activityForm.patchValue({
+      school_id: item.school_id,
+      branch_id: item.branch_id,
+      class_id: item.class_id,
+      event_name: item.event_name,
+      date_time: formattedDate,
+      venue: item.venue,
+      category: item.category,
+      awards_recognitions: item.awards_recognitions,
+      description: item.description,
+      coordinator_name: item.coordinator_name,
+      status: item.status,
+      attachment_type: item.attachment_type
     });
 
     this.showModal = true;
   }
 
-  openEdit(activity: any) {
-    this.editId = activity.id;
-    this.selectedFile = null;
 
-    this.culturalForm.patchValue({
-      ...activity,
-      branch_id: activity.branch_id,
-      class_id: activity.class_id
-    });
-
-    this.showModal = true;
+  onFileSelected(event: any) {
+    this.file = event.target.files[0];
   }
 
-  // ===== SAVE =====
   save() {
-    if (this.culturalForm.invalid) {
-      this.notify.error('Please fill required fields');
+
+    if (this.activityForm.invalid) {
+      this.notify.error('Please fill all required fields');
       return;
+    }
+
+    const payload: any = { ...this.activityForm.value };
+
+    // ✅ Convert date back to API format
+    if (payload.date_time) {
+      payload.date_time =
+        payload.date_time.replace('T', ' ') + ':00';
     }
 
     const formData = new FormData();
 
-    Object.entries(this.culturalForm.value).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        formData.append(key, value as any);
+    Object.keys(payload).forEach(key => {
+      if (payload[key] !== null && payload[key] !== undefined) {
+        formData.append(key, payload[key].toString());
       }
     });
 
-    if (this.selectedFile) {
-      formData.append('attachment', this.selectedFile);
+    if (this.file) {
+      formData.append('attachment', this.file);
     }
 
-    const api$ = this.editId
+    const request$ = this.editId
       ? this.service.updateculturalactivity(this.editId, formData)
       : this.service.createculturalactivity(formData);
 
-    api$.subscribe({
-      next: () => {
-        this.notify.success(this.editId ? 'Updated successfully' : 'Created successfully');
-        this.showModal = false;
-        this.loadActivities();
+    this.loading = true;
+
+    request$.subscribe({
+      next: (res: any) => {
+
+        if (res.success) {
+          this.notify.success(
+            this.editId
+              ? 'Activity updated successfully'
+              : 'Activity created successfully'
+          );
+
+          this.showModal = false;
+          this.loadActivities();
+        } else {
+          this.notify.error(res.message || 'Operation failed');
+        }
+
+        this.loading = false;
       },
-      error: () => this.notify.error('Operation failed')
+      error: () => {
+        this.notify.error('Server error');
+        this.loading = false;
+      }
     });
   }
 
-  // ===== DELETE =====
+
   delete(id: string) {
     if (!confirm('Delete this activity?')) return;
-
-    this.service.deleteculturalactivity(id).subscribe(() => {
-      this.activities = this.activities.filter(a => a.id !== id);
-      this.applyFilter();
-      this.notify.success('Deleted');
+    this.loading = true;
+    this.service.deleteculturalactivity(id).subscribe({
+      next: (res: any) => {
+        if (res.success) this.notify.success('Activity deleted');
+        else this.notify.error('Delete failed');
+        this.loadActivities();
+        this.loading = false;
+      },
+      error: () => {
+        this.notify.error('Server error');
+        this.loading = false;
+      }
     });
   }
 }
+

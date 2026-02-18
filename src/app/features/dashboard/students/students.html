@@ -153,10 +153,11 @@
         <label>Admission Date</label>
         <input type="date" formControlName="admission_date" />
       </div>
-           <div>
-                <label>Upload Image</label>
-                <input type="file" (change)="onFileChange($event)" />
-            </div>
+      <div>
+        <label>Upload Image</label>
+        <input type="file" (change)="onFileChange($event)" />
+      </div>
+      
       <div class="full">
         <label>Status</label>
         <select formControlName="status">
@@ -164,7 +165,7 @@
           <option value="Inactive">Inactive</option>
         </select>
       </div>
-         
+
     </form>
 
     <div class="actions">

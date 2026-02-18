@@ -1,0 +1,80 @@
+<!-- <div class="container">
+  <h2>Module Permissions</h2>
+
+  <div class="search-bar">
+    <input type="text" placeholder="Search..." [(ngModel)]="searchText" />
+    <button (click)="applyFilter()">Search</button>
+    <button (click)="openAdd()">+ Add Permission</button>
+  </div>
+
+  <table class="permissions-table">
+    <thead>
+      <tr>
+        <th>Module</th>
+        <th>Role</th>
+        <th>C/U/D/I/S</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let perm of paginatedPermissions">
+        <td>{{ perm.module_name }}</td>
+        <td>{{ getRoleName(perm.role_id) }}</td>
+        <td>
+          {{ perm.permissions.create }}/
+          {{ perm.permissions.update }}/
+          {{ perm.permissions.delete }}/
+          {{ perm.permissions.index }}/
+          {{ perm.permissions.show }}
+        </td>
+        <td>
+          <button (click)="openEdit(perm)">Edit</button>
+          <button (click)="delete(perm.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+    <span>{{ currentPage }} / {{ pages.length }}</span>
+    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === pages.length">Next</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<!-- <div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+    <h3>{{ editId ? 'Edit Permission' : 'Add Permission' }}</h3>
+    <form [formGroup]="permissionForm" (ngSubmit)="save()">
+      <div>
+        <label>Role:</label>
+        <select formControlName="role_id">
+          <option value="">Select Role</option>
+          <option *ngFor="let role of roles" [value]="role.id">{{ role.role_name }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Module:</label>
+        <select formControlName="module_key">
+          <option value="">Select Module</option>
+          <option *ngFor="let m of modules" [value]="m.module_key">{{ m.module_name }}</option>
+        </select>
+      </div>
+
+      <div class="permissions-checkboxes">
+        <label><input type="checkbox" formControlName="create" /> Create</label>
+        <label><input type="checkbox" formControlName="update" /> Update</label>
+        <label><input type="checkbox" formControlName="delete" /> Delete</label>
+        <label><input type="checkbox" formControlName="index" /> Index</label>
+        <label><input type="checkbox" formControlName="show" /> Show</label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit">{{ editId ? 'Update' : 'Create' }}</button>
+        <button type="button" (click)="showModal = false">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div> --> -->

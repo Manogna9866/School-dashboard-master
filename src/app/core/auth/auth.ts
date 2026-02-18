@@ -2,6 +2,7 @@ import { Injectable, inject, PLATFORM_ID, signal, computed } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { ApiService } from '../services/api';
 import { ModuleService } from '../modules/module';
+import { Observable } from 'rxjs';
 
 export type UserRole = 'superadmin' | 'admin' | 'subadmin' | 'villager';
 
@@ -240,7 +241,7 @@ export class AuthService {
   }
 
 
-  updateculturalactivity(id: string, payload: any) {
+  updateculturalactivity(id: string, payload: FormData) {
     return this.api.put<any>(`cultural_activities/${id}`, payload);
   }
   deleteculturalactivity(id: string) {
@@ -429,6 +430,22 @@ export class AuthService {
   }
   deleteExam(id: string) {
     return this.api.delete<any>(`exam/${id}`);
+  }
+  //module-permissions//
+  getRolePermissions(roleId: number): Observable<any> {
+    return this.api.get<any>(`roles/${roleId}`);
+  }
+
+  updatePermission(permissionId: number, data: any): Observable<any> {
+    return this.api.put<any>(`permissions/${permissionId}`, data);
+  }
+
+  createPermission(data: any): Observable<any> {
+    return this.api.post<any>('permissions', data);
+  }
+
+  deletePermission(permissionId: number): Observable<any> {
+    return this.api.delete<any>(`permissions/${permissionId}`);
   }
   // ✅ SAVE SESSION
   setSession(data: any) {

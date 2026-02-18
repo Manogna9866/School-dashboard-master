@@ -11,7 +11,7 @@ import { NotifyService } from '../../../core/services/notify';
   styleUrl: './students.scss',
 })
 export class Students {
-   students: any[] = [];
+  students: any[] = [];
   filteredStudents: any[] = [];
   paginatedStudents: any[] = [];
   schools: any[] = [];
@@ -36,6 +36,22 @@ export class Students {
   private notify = inject(NotifyService);
 
   ngOnInit() {
+    this.initForm();
+    this.loadSchools();
+    this.loadStudents();
+
+    // Auto-load branches when school changes
+    this.studentForm.get('school_id')?.valueChanges.subscribe((schoolId) => {
+      if (schoolId) {
+        this.loadBranchesBySchool(Number(schoolId));
+      } else {
+        this.branches = [];
+        this.studentForm.patchValue({ branch_id: '' });
+      }
+    });
+  }
+
+  initForm() {
     this.studentForm = this.fb.group({
       school_id: ['', Validators.required],
       branch_id: ['', Validators.required],
@@ -47,24 +63,11 @@ export class Students {
       class_id: ['', Validators.required],
       roll_number: ['', Validators.required],
       phone_number: ['', Validators.required],
-      email: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       address: ['', Validators.required],
       admission_date: ['', Validators.required],
       status: ['Active', Validators.required],
       profile_photo: ['']
-    });
-
-    this.loadSchools();
-    this.loadStudents();
-
-    // 🔥 School change auto load branches
-    this.studentForm.get('school_id')?.valueChanges.subscribe((schoolId) => {
-      if (schoolId) {
-        this.loadBranchesBySchool(Number(schoolId));
-      } else {
-        this.branches = [];
-        this.studentForm.patchValue({ branch_id: '' });
-      }
     });
   }
 
@@ -180,10 +183,9 @@ export class Students {
   }
 
   openEdit(student: any) {
-    this.editId = student.id;
+    this.editId = String(student.id);
     this.showModal = true;
 
-    // 🔥 Load branches for selected school
     if (student.school_id) {
       this.loadBranchesBySchool(Number(student.school_id));
     }
@@ -205,74 +207,106 @@ export class Students {
       status: student.status
     });
 
-    // 🔥 Show existing profile photo
-    if (student.profile_photo) {
-      this.photoPreview = student.profile_photo;
-    }
+    // 🔥 Preview existing image
+    this.photoPreview = student.profile_photo || null;
+    this.selectedFile = null;
+    console.log('Editing student, current photo preview:', this.photoPreview);
   }
+
 
   /* ================= SAVE ================= */
 
   save() {
-
     if (this.studentForm.invalid) {
       this.notify.error('Please fill all required fields');
       return;
     }
 
     this.loading = true;
-
     const formValues = this.studentForm.value;
-    const formData = new FormData();
 
-    formData.append('school_id', String(Number(formValues.school_id)));
-    formData.append('branch_id', String(Number(formValues.branch_id)));
-    formData.append('class_id', String(Number(formValues.class_id)));
+    // Prepare payload
+    const payload: any = {
+      school_id: Number(formValues.school_id),
+      branch_id: Number(formValues.branch_id),
+      class_id: Number(formValues.class_id),
+      first_name: formValues.first_name,
+      last_name: formValues.last_name,
+      gender: formValues.gender,
+      date_of_birth: formValues.date_of_birth,
+      aadhaar_number: formValues.aadhaar_number,
+      roll_number: formValues.roll_number,
+      phone_number: formValues.phone_number,
+      email: formValues.email,
+      address: formValues.address,
+      admission_date: formValues.admission_date,
+      status: formValues.status,
+      discontinuation_status: 'No',
+      rejoined: 'No',
+    };
 
-    formData.append('first_name', formValues.first_name || '');
-    formData.append('last_name', formValues.last_name || '');
-    formData.append('gender', formValues.gender || '');
-    formData.append('date_of_birth', formValues.date_of_birth || '');
-    formData.append('aadhaar_number', formValues.aadhaar_number || '');
-    formData.append('roll_number', formValues.roll_number || '');
-    formData.append('phone_number', formValues.phone_number || '');
-    formData.append('email', formValues.email || '');
-    formData.append('address', formValues.address || '');
-    formData.append('admission_date', formValues.admission_date || '');
-    formData.append('status', formValues.status || 'Active');
-
-    formData.append('discontinuation_status', 'No');
-    formData.append('rejoined', 'No');
+    let request$;
 
     if (this.selectedFile) {
+      // If file selected, use FormData
+      const formData = new FormData();
+      Object.keys(payload).forEach(k => formData.append(k, payload[k]));
       formData.append('profile_photo', this.selectedFile);
+      request$ = this.service.updatestudent(this.editId!, formData);
+    } else {
+      // No file, send JSON
+      request$ = this.service.updatestudent(this.editId!, payload);
     }
-
-    const request$ = this.editId
-      ? this.service.updatestudent(this.editId, formData)
-      : this.service.createstudent(formData);
 
     request$.subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.notify.success(this.editId ? 'Student updated' : 'Student added');
+          this.notify.success('Student updated successfully');
           this.showModal = false;
           this.selectedFile = null;
           this.photoPreview = null;
-          this.searchText = '';
           this.loadStudents();
         } else {
-          this.notify.error(res.message || 'Operation failed');
+          this.notify.error(res.message || 'Update failed');
         }
         this.loading = false;
       },
       error: (err) => {
-        console.error("Student Save Error:", err);
-        this.notify.error(err?.error?.message || 'Server error');
+        console.error('Update error:', err);
+        this.notify.error(err?.error?.message || 'Server error while updating student');
         this.loading = false;
       }
     });
   }
+
+
+  handleUpdateResponse(res: any) {
+    console.log('Update response:', res);
+    if (res.success) {
+      this.notify.success('Student updated');
+      this.resetModal();
+      this.loadStudents();
+    } else {
+      this.notify.error(res.message || 'Update failed');
+    }
+    this.loading = false;
+  }
+
+  handleUpdateError(err: any) {
+    console.error('Update Error:', err);
+    this.notify.error(err?.error?.message || 'Server error while updating student');
+    this.loading = false;
+  }
+
+  resetModal() {
+    this.showModal = false;
+    this.selectedFile = null;
+    this.photoPreview = null;
+    this.studentForm.reset({ status: 'Active' });
+    this.editId = null;
+  }
+
+
 
   /* ================= DELETE ================= */
 
